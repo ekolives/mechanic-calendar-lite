@@ -207,14 +207,14 @@ echo '</select>';
 
                         echo "<tr>
         <td><a href='reservation_details.php?slot_id=" . $slot_id . "' class='button'>" . $slot_date . "</a></td>
-        <td>" . htmlspecialchars($mechanic_name) . "</td>
-        <td>" . substr($slot_time, 0, 5) . "</td>
-        <td>" . substr($slot_end, 0, 5) . "</td>
-        <td>" . htmlspecialchars($reservation_title) . "</td>
-        <td>" . htmlspecialchars($reservation_description) . "</td>
-        <td>" . htmlspecialchars($reservation_phone) . "</td>
-        <td>" . htmlspecialchars($reservation_vin) . "</td>
-        <td>" . htmlspecialchars($reservation_plate) . "</td>
+        <td>" . htmlspecialchars((string) $mechanic_name) . "</td>
+        <td>" . substr((string) $slot_time, 0, 5) . "</td>
+        <td>" . substr((string) $slot_end, 0, 5) . "</td>
+        <td>" . htmlspecialchars((string) $reservation_title) . "</td>
+        <td>" . htmlspecialchars((string) $reservation_description) . "</td>
+        <td>" . htmlspecialchars((string) $reservation_phone) . "</td>
+        <td>" . htmlspecialchars((string) $reservation_vin) . "</td>
+        <td>" . htmlspecialchars((string) $reservation_plate) . "</td>
     </tr>";
                     }
                     ?>
