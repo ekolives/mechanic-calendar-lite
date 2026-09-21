@@ -313,11 +313,11 @@ $stmt->close();
                         </label>
                         <div class="edit-time-row">
                             <label><?php echo $lang_time_start; ?>:
-                                <input type="time" name="reservation[slot_start]" id="resSlotStart" required>
+                                <input type="time" name="reservation[slot_start]" id="resSlotStart" step="1800" required>
                             </label>
 
                             <label><?php echo $lang_time_end; ?>:
-                                <input type="time" name="reservation[slot_time_end]" id="resSlotEnd" required>
+                                <input type="time" name="reservation[slot_time_end]" id="resSlotEnd" step="1800" required>
                             </label>
                         </div>
                         <label><?php echo $lang_title; ?>:
@@ -369,11 +369,20 @@ $stmt->close();
                         <div class="edit-time-row">
                             <label>
                                 <?php echo $lang_time_start; ?>:
-                                <input type="time" name="reservation[slot_start]" id="editSlotStart" required>
+                                <input type="time"
+                                    name="reservation[slot_start]"
+                                    id="editSlotStart"
+                                    step="1800"
+                                    required>
                             </label>
+
                             <label>
                                 <?php echo $lang_time_end; ?>:
-                                <input type="time" name="reservation[slot_time_end]" id="editSlotEnd" required>
+                                <input type="time"
+                                    name="reservation[slot_time_end]"
+                                    id="editSlotEnd"
+                                    step="1800"
+                                    required>
                             </label>
                         </div>
 
@@ -609,8 +618,6 @@ $stmt->close();
                     });
                 }
             });
-
-
         </script>
 
     </div>
