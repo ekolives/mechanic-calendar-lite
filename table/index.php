@@ -262,19 +262,19 @@ $stmt->close();
                         <?php
 
                         if ($view == 'weekly') {
-                            echo '<td><button type="submit" name="week" value="prev">' . $lang_prev_week . '</button>';
-                            echo '<td><button type="submit" name="week" value="next">' . $lang_next_week . '</button>';
+                            echo '<td><button type="submit" name="week" value="prev">← ' . $lang_prev_week . '</button>';
+                            echo '<td><button type="submit" name="week" value="next">' . $lang_next_week . ' →</button>';
                         } else {
-                            echo '<td><button type="submit" name="day" value="prev">' . $lang_prev_day . '</button>';
-                            echo '<td><button type="submit" name="day" value="next">' . $lang_next_day . '</button>';
+                            echo '<td><button type="submit" name="day" value="prev">← ' . $lang_prev_day . '</button>';
+                            echo '<td><button type="submit" name="day" value="next">' . $lang_next_day . ' →</button>';
                         }
                         ?>
 
                         </form>
-                    <td><a href="../settings/index.php" style="margin-left: auto;" class="button-green"><?php echo $lang_settings; ?></a></td>
-                    <td><a href="index.php?view=daily" style="margin-left: auto;" class="button-orange"><?php echo $lang_daily_view; ?></a></td>
-                    <td><a href="index.php?view=weekly" style="margin-left: auto;" class="button-orange"><?php echo $lang_weekly_view; ?></a>
-                    <td><a href="reservation_list.php" style="margin-left: auto;" class="button-green"><?php echo $lang_reservation_list; ?></a>
+                    <td><a href="../settings/index.php" style="margin-left: auto;" class="button-green">⚙ <?php echo $lang_settings; ?></a></td>
+                    <td><a href="index.php?view=daily" style="margin-left: auto;" class="button-orange">📅 <?php echo $lang_daily_view; ?></a></td>
+                    <td><a href="index.php?view=weekly" style="margin-left: auto;" class="button-orange"><?php echo $lang_weekly_view; ?> 📅</a>
+                    <td><a href="reservation_list.php" style="margin-left: auto;" class="button-green">☷ <?php echo $lang_reservation_list; ?></a>
 
                 </tr>
             </table>

@@ -174,7 +174,10 @@ $reservationNumber = 'REQ' . str_pad($slot['slot_id'], 7, '0', STR_PAD_LEFT);
 
 
                     <td><a href="reservation_list.php" class="button">Powrót do Listy</a></td>
-                    <td><button type="submit" class="button-green">Zapisz zmiany</button></td>
+                
+
+                    <td><button type="submit" class="button-green">Zapisz zmiany</button>
+                <a href="index.php" class="button">Powrót do Kalendarza</a></td>
                 </table>
             </form>
 
