@@ -533,6 +533,19 @@ th {
   width: 100%;
 }
 
+.inline-label,
+.modal .inline-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inline-label input,
+.modal .inline-label input {
+  flex: 1;
+  width: auto;
+}
+
 .modal-close {
   position: absolute;
   top: 10px;

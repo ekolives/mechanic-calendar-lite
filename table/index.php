@@ -326,13 +326,13 @@ $stmt->close();
                         <label><?php echo $lang_description; ?>:
                             <textarea name="reservation[reservation_description]" rows="3"></textarea>
                         </label>
-                        <label><?php echo $lang_phone; ?>:
+                        <label class="inline-label"><?php echo $lang_phone; ?>:
                             <input type="text" name="reservation[phone]">
                         </label>
-                        <label><?php echo $lang_vin; ?>:
+                        <label class="inline-label"><?php echo $lang_vin; ?>:
                             <input type="text" name="reservation[vin]">
                         </label>
-                        <label><?php echo $lang_plate; ?>:
+                        <label class="inline-label"><?php echo $lang_plate; ?>:
                             <input type="text" name="reservation[plate]">
                         </label>
                         <button type="submit" class="button-green"><?php echo $lang_save_reservation; ?></button>
@@ -394,13 +394,15 @@ $stmt->close();
                             <textarea name="reservation[reservation_description]" id="editDescription" rows="4"></textarea>
                         </label>
 
-                        <label><?php echo $lang_phone; ?>:
+                        <label class="inline-label"><?php echo $lang_phone; ?>:
                             <input type="text" name="reservation[phone]" id="editPhone">
                         </label>
 
-                        <label><?php echo $lang_vin; ?>:
+
+                        <label class="inline-label"><?php echo $lang_vin; ?>:
                             <input type="text" name="reservation[vin]" id="editVin">
                         </label>
+
 
 
                         <div class="edit-time-row">

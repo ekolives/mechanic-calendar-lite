@@ -38,6 +38,7 @@ if (isset($_GET['date_to']) && !empty($_GET['date_to'])) {
             <h3>Lista rezerwacji</h3>
         </div>
     </div>
+
     <div id="wrapper">
         <form method="get" action="reservation_list.php">
             <table>
@@ -83,6 +84,9 @@ echo '</select>';
                 </tr>
 
                 <tr>
+                     <th>Treść</th>
+                    <td><input type="text" name="reservation_search" value="<?php echo htmlspecialchars($_GET['reservation_search'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" /></td>
+                   
                     <th>Telefon</th>
                     <td><input type="text" name="reservation_phone" value="<?php echo htmlspecialchars($_GET['reservation_phone'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" /></td>
                     <th>VIN</th>
@@ -121,7 +125,7 @@ echo '</select>';
                     $reservation_plate = isset($_GET['reservation_plate']) ? trim($_GET['reservation_plate']) : '';
                     $reservation_rejected = isset($_GET['reservation_rejected']) ? trim($_GET['reservation_rejected']) : '';
                     $slot_id = isset($_GET['slot_id']) ? trim($_GET['slot_id']) : '';
-
+                    $reservation_search = isset($_GET['reservation_search']) ? trim($_GET['reservation_search']) : '';
 
                     $conditions = [];
                     if ($date_from_val && $date_to_val) {
@@ -155,6 +159,10 @@ echo '</select>';
 
                     if ($slot_id !== '') {
                         $conditions[] = "`calendar_slots`.`mechanic_id` = '$slot_id'";
+                    }
+                    if ($reservation_search !== '') {
+                        $search_safe = $conn->real_escape_string($reservation_search);
+                        $conditions[] = "(reservation_description LIKE '%$search_safe%' OR reservation_description LIKE '%$search_safe%')";
                     }
 
 
