@@ -68,116 +68,145 @@ $reservationNumber = 'REQ' . str_pad($slot['slot_id'], 7, '0', STR_PAD_LEFT);
 
                 <input type="hidden" name="reservation[slot_id]" value="<?php echo $slot['slot_id']; ?>">
 
+                <div style="display:flex; gap:20px;">
+                    <div style="flex:1;">
+                        <table>
+
+                            <tr>
+                                <th>Numer rezerwacji</th>
+                                <td>
+                                    <input type="text" name="reservation[slot_number]" value="<?php echo $reservationNumber; ?>" readonly>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Data</th>
+                                <td>
+                                    <input type="date" name="reservation[slot_date]"
+                                        value="<?php echo $slot['slot_date']; ?>" required>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Godzina start</th>
+                                <td>
+                                    <input type="time" name="reservation[slot_start]"
+                                        value="<?php echo substr($slot['slot_time_start'], 0, 5); ?>" required>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Godzina koniec</th>
+                                <td>
+                                    <input type="time" name="reservation[slot_time_end]"
+                                        value="<?php echo substr($slot['slot_time_end'], 0, 5); ?>" required>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Mechanik</th>
+                                <td>
+                                    <select name="reservation[mechanic_id]" required>
+                                        <option value="">-- wybierz mechanika --</option>
+
+                                        <?php
+                                        $mechStmt = $conn->query("SELECT mechanic_id, mechanic_name FROM mechanics ORDER BY mechanic_name");
+                                        while ($m = $mechStmt->fetch_assoc()) {
+                                            $sel = ($m['mechanic_id'] == $slot['mechanic_id']) ? 'selected' : '';
+                                            echo "<option value='{$m['mechanic_id']}' $sel>{$m['mechanic_name']}</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>NIP</th>
+                                <td>
+                                    <input type="text" name="reservation[nip]"
+                                        value="<?php echo $slot['nip']; ?>">
+                                    <label>
+                                        <input type="radio" name="reservation[receipt_or_invoice]" value="0"
+                                            <?php if ((int)($slot['receipt_or_invoice'] ?? 0) === 0) echo 'checked'; ?>>
+                                        Paragon
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="reservation[receipt_or_invoice]" value="1"
+                                            <?php if ((int)($slot['receipt_or_invoice'] ?? 0) === 1) echo 'checked'; ?>>
+                                        Faktura
+                                    </label>
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    <select name="reservation[state]">
+                                        <option value="0" <?php if ($slot['reservation_state'] == 0) echo 'selected'; ?>>Aktywna</option>
+                                        <option value="1" <?php if ($slot['reservation_state'] == 1) echo 'selected'; ?>>Anulowana</option>
+                                        <option value="2" <?php if ($slot['reservation_state'] == 2) echo 'selected'; ?>>Zakończona</option>
+                                    </select>
+                                </td>
+                            </tr>
+
+                        </table>
+                    </div>
+
+                    <div style="flex:1;">
+                        <table>
+
+                            <tr>
+                                <th>Tytuł</th>
+                                <td>
+                                    <input type="text" name="reservation[title]"
+                                        value="<?php echo $slot['reservation_title']; ?>" style="width: 100%;">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Opis</th>
+                                <td>
+                                    <textarea name="reservation[reservation_description]" rows="4"><?php echo $slot['reservation_description']; ?></textarea>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Telefon</th>
+                                <td>
+                                    <input type="text" name="reservation[phone]"
+                                        value="<?php echo $slot['reservation_phone']; ?>">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>VIN</th>
+                                <td>
+                                    <input type="text" name="reservation[vin]"
+                                        value="<?php echo $slot['reservation_vin']; ?>" maxlength="11">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Rejestracja</th>
+                                <td>
+                                    <input type="text" name="reservation[plate]"
+                                        value="<?php echo $slot['reservation_plate']; ?>">
+                                </td>
+                            </tr>
+
+                        </table>
+                    </div>
+                </div>
+
                 <table>
-
                     <tr>
-                        <th>Numer rezerwacji</th>
-                        <td>
-                            <input type="text" name="reservation[slot_id]" value="<?php echo $reservationNumber; ?>" readonly>
+                        <td><a href="reservation_list.php" class="button">Powrót do Listy</a></td>
+
+                        <td><button type="submit" class="button-green">Zapisz zmiany</button></td>
+                        <td style="text-align: right;"><a href="index.php" class="button">Powrót do Kalendarza</a>
                         </td>
                     </tr>
-
-
-
-                    <tr>
-                        <th>Data</th>
-                        <td>
-                            <input type="date" name="reservation[slot_date]"
-                                value="<?php echo $slot['slot_date']; ?>" required>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th>Godzina start</th>
-                        <td>
-                            <input type="time" name="reservation[slot_start]"
-                                value="<?php echo substr($slot['slot_time_start'], 0, 5); ?>" required>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th>Godzina koniec</th>
-                        <td>
-                            <input type="time" name="reservation[slot_time_end]"
-                                value="<?php echo substr($slot['slot_time_end'], 0, 5); ?>" required>
-                        </td>
-                    </tr>
-
-
-                    <tr>
-                        <th>Tytuł</th>
-                        <td>
-                            <input type="text" name="reservation[title]"
-                                value="<?php echo $slot['reservation_title']; ?>">
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th>Opis</th>
-                        <td>
-                            <textarea name="reservation[reservation_description]" rows="4"><?php echo $slot['reservation_description']; ?></textarea>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th>Telefon</th>
-                        <td>
-                            <input type="text" name="reservation[phone]"
-                                value="<?php echo $slot['reservation_phone']; ?>">
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th>VIN</th>
-                        <td>
-                            <input type="text" name="reservation[vin]"
-                                value="<?php echo $slot['reservation_vin']; ?>">
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th>Rejestracja</th>
-                        <td>
-                            <input type="text" name="reservation[plate]"
-                                value="<?php echo $slot['reservation_plate']; ?>">
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th>Status</th>
-                        <td>
-                            <select name="reservation[state]">
-                                <option value="0" <?php if ($slot['reservation_state'] == 0) echo 'selected'; ?>>Aktywna</option>
-                                <option value="1" <?php if ($slot['reservation_state'] == 1) echo 'selected'; ?>>Anulowana</option>
-                                <option value="2" <?php if ($slot['reservation_state'] == 2) echo 'selected'; ?>>Zakończona</option>
-                            </select>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th>Mechanik</th>
-                        <td>
-                            <select name="reservation[mechanic_id]" required>
-                                <option value="">-- wybierz mechanika --</option>
-
-                                <?php
-                                $mechStmt = $conn->query("SELECT mechanic_id, mechanic_name FROM mechanics ORDER BY mechanic_name");
-                                while ($m = $mechStmt->fetch_assoc()) {
-                                    $sel = ($m['mechanic_id'] == $slot['mechanic_id']) ? 'selected' : '';
-                                    echo "<option value='{$m['mechanic_id']}' $sel>{$m['mechanic_name']}</option>";
-                                }
-                                ?>
-                            </select>
-                        </td>
-                    </tr>
-
-
-
-                    <td><a href="reservation_list.php" class="button">Powrót do Listy</a></td>
-                
-
-                    <td><button type="submit" class="button-green">Zapisz zmiany</button>
-                <a href="index.php" class="button">Powrót do Kalendarza</a></td>
                 </table>
             </form>
 

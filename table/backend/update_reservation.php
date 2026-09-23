@@ -7,13 +7,20 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+/** @var mysqli $conn */
+/** @var string $userName */
+/** @var string audit_log */
+
+
+
+
 // Edycja rezerwacji
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     if (isset($_POST['reservation']) && is_array($_POST['reservation']) && !empty($_POST['reservation']['slot_id'])) {
         $r = $_POST['reservation'];
-        $slotId = (int)$r['slot_id'];
+        $slotId = trim($r['slot_id']);
         $title = trim($r['title'] ?? '');
         $reservation_description = trim($r['reservation_description'] ?? '');
         $phone = trim($r['phone'] ?? '');
@@ -24,12 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $dateInput = $r['slot_date'] ?? '';
         $state = isset($r['state']) ? (int)$r['state'] : 0;
         $new_mechanic_id = isset($r['mechanic_id']) ? (int)$r['mechanic_id'] : 0;
-
-        //print_r($r);
-
+        $receipt_or_invoice = trim($r['receipt_or_invoice'] ?? 'paragon');
+        $nip = trim($r['nip'] ?? '');
 
         $selectStmt = $conn->prepare('SELECT mechanic_id FROM calendar_slots WHERE slot_id = ?');
-        $selectStmt->bind_param('i', $slotId);
+        $selectStmt->bind_param('s', $slotId);
         $selectStmt->execute();
         $selectResult = $selectStmt->get_result();
         $mechanicRow = $selectResult->fetch_assoc();
@@ -76,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $_SESSION['reservation_error'] = 'Zaktualizowany termin nachodzi na inną rezerwację tego mechanika.';
                         } else {
                             $stmt = $conn->prepare(
-                                'UPDATE calendar_slots 
+        'UPDATE calendar_slots 
          SET 
          slot_time_start = ?, 
          slot_time_end = ?, 
@@ -89,12 +95,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          slot_date = ?, 
          mechanic_id = ?,
          sys_updatedby = ?, 
-         sys_updatedate = NOW()
+         sys_updatedate = NOW(), 
+         nip = ?, 
+         receipt_or_invoice = ?
 
          WHERE slot_id = ?'
                             );
                             $stmt->bind_param(
-                                'sssssssisiii',
+                                'sssssssisiisss',
                                 $slotStart,
                                 $slotEnd,
                                 $title,
@@ -106,15 +114,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $dateInput,
                                 $new_mechanic_id,
                                 $userId,
+                                $nip,
+                                $receipt_or_invoice,
                                 $slotId
                             );
-                            $_SESSION['reservation_success'] = 'Rezerwacja została pomyślnie zaktualizowana.';
-
-                            $audit_log_data ="oldMechanicId = $mechanicId, newMechanicId = $new_mechanic_id, slotStart = $slotStart, slotEnd = $slotEnd, title = $title, reservation_description = $reservation_description, phone = $phone, vin = $vin, plate = $plate, state = $state";
-                            audit_log($conn, $userName, 'Modify reservation', 'Slot ID: ' . $slotId . ' + ' . $audit_log_data);
-
-
-                            $stmt->execute();
+                            if ($stmt->execute()) {
+                                $_SESSION['reservation_success'] = 'Rezerwacja została pomyślnie zaktualizowana.';
+                                $audit_log_data ="oldMechanicId = $mechanicId, newMechanicId = $new_mechanic_id, slotStart = $slotStart, slotEnd = $slotEnd, title = $title, reservation_description = $reservation_description, phone = $phone, vin = $vin, plate = $plate, state = $state";
+                                audit_log($conn, $userName, 'Modify reservation', 'Slot ID: ' . $slotId . ' + ' . $audit_log_data);
+                            } else {
+                                $_SESSION['reservation_error'] = 'Nie udało się zaktualizować rezerwacji: ' . $stmt->error;
+                            }
                             $stmt->close();
                         }
                     } else {
@@ -122,10 +132,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
             }
+        } else {
+            $_SESSION['reservation_error'] = 'Nie znaleziono rezerwacji o wskazanym identyfikatorze.';
         }
     }
 }
-//echo json_encode(['error' => $errorMessage ?? null]);
+//echo json_encode([
+//    'error' => $_SESSION['reservation_error'] ?? null,
+//    'success' => $_SESSION['reservation_success'] ?? null,
+//]);
+
+
 // przekaz $errorMessage na stronę przez sesję
 header('Location: ' . $_SERVER['HTTP_REFERER']);
 exit;
