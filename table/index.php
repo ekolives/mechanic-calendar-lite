@@ -330,7 +330,7 @@ $stmt->close();
                             <input type="text" name="reservation[phone]">
                         </label>
                         <label class="inline-label"><?php echo $lang_vin; ?>:
-                            <input type="text" name="reservation[vin]" maxlength="11">
+                            <input type="text" name="reservation[vin]" maxlength="17">
                         </label>
                         <label class="inline-label"><?php echo $lang_plate; ?>:
                             <input type="text" name="reservation[plate]">
@@ -400,7 +400,7 @@ $stmt->close();
 
 
                         <label class="inline-label"><?php echo $lang_vin; ?>:
-                            <input type="text" name="reservation[vin]" id="editVin" maxlength="11">
+                            <input type="text" name="reservation[vin]" id="editVin" maxlength="17">
                         </label>
 
 

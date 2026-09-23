@@ -183,7 +183,7 @@ $reservationNumber = 'REQ' . str_pad($slot['slot_id'], 7, '0', STR_PAD_LEFT);
                                 <th>VIN</th>
                                 <td>
                                     <input type="text" name="reservation[vin]"
-                                        value="<?php echo $slot['reservation_vin']; ?>" maxlength="11">
+                                        value="<?php echo $slot['reservation_vin']; ?>" maxlength="17">
                                 </td>
                             </tr>
 
