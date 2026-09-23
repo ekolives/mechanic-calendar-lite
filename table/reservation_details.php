@@ -167,7 +167,7 @@ $reservationNumber = 'REQ' . str_pad($slot['slot_id'], 7, '0', STR_PAD_LEFT);
                             <tr>
                                 <th>Opis</th>
                                 <td>
-                                    <textarea name="reservation[reservation_description]" rows="4"><?php echo $slot['reservation_description']; ?></textarea>
+                                    <textarea name="reservation[reservation_description]" rows="5"><?php echo $slot['reservation_description']; ?></textarea>
                                 </td>
                             </tr>
 
@@ -201,16 +201,28 @@ $reservationNumber = 'REQ' . str_pad($slot['slot_id'], 7, '0', STR_PAD_LEFT);
 
                 <table>
                     <tr>
-                        <td><a href="reservation_list.php" class="button">Powrót do Listy</a></td>
-
-                        <td><button type="submit" class="button-green">Zapisz zmiany</button></td>
-                        <td style="text-align: right;"><a href="index.php" class="button">Powrót do Kalendarza</a>
+                        <th style="width: 100px;">Komentarz Mechanika</th>
+                        <td>
+                            <textarea name="reservation[comment]" rows="3"><?php echo $slot['comment']; ?></textarea>
                         </td>
                     </tr>
                 </table>
-            </form>
 
-            <small>Utworzono: <?php echo $slot['sys_createdate']; ?></small><br>
+
+        </div>
+
+        <table>
+            <tr>
+                <td><a href="reservation_list.php" class="button">Powrót do Listy</a></td>
+                <td><button type="submit" class="button-green">Zapisz zmiany</button></td>
+                <td style="text-align: right;"><a href="index.php" class="button">Powrót do Kalendarza</a>
+                </td>
+            </tr>
+        </table>
+        </form>
+
+        <div class="sys-box">
+             Utworzono: <?php echo $slot['sys_createdate']; ?></small>
             <?php
             // get info who created and updated
             $sys_submiter = $slot['sys_submiter'];
@@ -223,10 +235,10 @@ $reservationNumber = 'REQ' . str_pad($slot['slot_id'], 7, '0', STR_PAD_LEFT);
             $submiter = $submiter->fetch_assoc();
             $submiter_name = $submiter['user_login'];
 
-            echo "<small>Utworzony przez: $submiter_name</small><br>";
+            echo "  przez: $submiter_name</small><br>";
             ?>
 
-            <small>Ostatnia aktualizacja: <?php echo $slot['sys_updatedate']; ?></small><br>
+             Ostatnia aktualizacja: <?php echo $slot['sys_updatedate']; ?></small>
 
 
             <?php
@@ -241,10 +253,10 @@ $reservationNumber = 'REQ' . str_pad($slot['slot_id'], 7, '0', STR_PAD_LEFT);
             $updater = $updater->fetch_assoc();
             $updater_name = $updater['user_login'];
 
-            echo "<small>Utworzony przez: $updater_name</small><br>";
+            echo "  przez: $updater_name</small><br>";
             ?>
-
         </div>
+    </div>
     </div>
 
 </body>

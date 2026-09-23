@@ -4,7 +4,7 @@ require_once __DIR__ . '/../sys-backend/db_connect.php';
 
 // last mont date definition
 $date_from = new DateTime();
-$date_from->modify('-1 month');
+$date_from->modify('-6 month');
 $date_to = new DateTime();
 $date_to->modify('+1 month');
 
@@ -43,7 +43,7 @@ if (isset($_GET['date_to']) && !empty($_GET['date_to'])) {
         <form method="get" action="reservation_list.php">
             <table>
                 <tr>
-                    <th>Slot</th>
+                    <th class="reservation-filter-label">Slot</th>
 
                     <td>
 <?php
@@ -73,26 +73,25 @@ echo '</select>';
 
                     </td>
 
-                    <th> Data od </th>
+                    <th class="reservation-filter-label"> Data od </th>
                     <td><input type="date" name="date_from" value="<?php echo $date_from->format('Y-m-d'); ?>"></td>
-                    <th> Data do </th>
+                    <th class="reservation-filter-label"> Data do </th>
                     <td><input type="date" name="date_to" value="<?php echo $date_to->format('Y-m-d'); ?>"></td>
                     <td><button class="button-green">Filtruj</button></td>
-                    <td style="text-align: center;"><a href="reservation_list.php" class="button-red">Wyczyść filtry</a></td>
-                    <td><a href="index.php" class="button">Powrót do Kalendarza</a></td>
+                    <td style="text-align: center;"><a href="reservation_list.php" class="button-red">Wyczyść filtr</a></td>
+                    <td><a href="index.php" class="button">Kalendarz</a></td>
                     <td></td>
                 </tr>
 
                 <tr>
-                     <th>Treść</th>
+                     <th class="reservation-filter-label">Treść</th>
                     <td><input type="text" name="reservation_search" value="<?php echo htmlspecialchars($_GET['reservation_search'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" /></td>
-                   
-                    <th>Telefon</th>
-                    <td><input type="text" name="reservation_phone" value="<?php echo htmlspecialchars($_GET['reservation_phone'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" /></td>
+                    <th class="reservation-filter-label">Telefon</th>
+                    <td><input type="text" name="reservation_phone" value="<?php echo htmlspecialchars($_GET['reservation_phone'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 120px;" /></td>
                     <th>VIN</th>
-                    <td><input type="text" name="reservation_vin" value="<?php echo htmlspecialchars($_GET['reservation_vin'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" /></td>
-                    <th>Rejestracja</th>
-                    <td><input type="text" name="reservation_plate" value="<?php echo htmlspecialchars($_GET['reservation_plate'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" /></td>
+                    <td><input type="text" name="reservation_vin" value="<?php echo htmlspecialchars($_GET['reservation_vin'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 170px;" /></td>
+                    <th class="reservation-filter-label">Rejestracja</th>
+                    <td><input type="text" name="reservation_plate" value="<?php echo htmlspecialchars($_GET['reservation_plate'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 100px;" /></td>
                     <th>Odwołana?</th>
                     <td style="text-align: center; "><input type="checkbox" name="reservation_rejected" value="1" <?php echo isset($_GET['reservation_rejected']) ? 'checked' : ''; ?>>Tak</td>
                     </td>
@@ -108,12 +107,12 @@ echo '</select>';
                         <th>Data</th>
                         <th>Nazwa Slotu</th>
                         <th>Start</th>
-                        <th style="white-space:nowrap;">Koniec</th>
+                        <th>End</th>
                         <th>Tytuł</th>
                         <th>Opis</th>
-                        <th style="white-space:nowrap;">Telefon</th>
-                        <th style="white-space:nowrap;">VIN</th>
-                        <th style="white-space:nowrap;">Rejestracja</th>
+                        <th>Telefon</th>
+                        <th>VIN</th>
+                        <th>Rej</th>
                     </tr>
                     <?php
 
@@ -214,7 +213,7 @@ echo '</select>';
 
 
                         echo "<tr>
-        <td><a href='reservation_details.php?slot_id=" . $slot_id . "' class='button'>" . $slot_date . "</a></td>
+        <td class='reservation-date-column'><a href='reservation_details.php?slot_id=" . $slot_id . "' class='button'>" . $slot_date . "</a></td>
         <td>" . htmlspecialchars((string) $mechanic_name) . "</td>
         <td>" . substr((string) $slot_time, 0, 5) . "</td>
         <td>" . substr((string) $slot_end, 0, 5) . "</td>

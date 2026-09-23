@@ -196,7 +196,7 @@ $rangeEnd = $view === 'daily' ? $dateInput : $days[count($days) - 1]->format('Y-
 $entries = [];
 $stmt = $conn->prepare(
     'SELECT slot_id, mechanic_id, slot_date, slot_time_start, slot_time_end, reservation_title, reservation_description, reservation_phone, reservation_vin, reservation_plate,
-            sys_createdate, sys_submiter, sys_updatedate, sys_updatedby, reservation_state 
+            sys_createdate, sys_submiter, sys_updatedate, sys_updatedby, reservation_state, nip, receipt_or_invoice, comment
      FROM calendar_slots
      WHERE slot_date BETWEEN ? AND ?'
 );
@@ -329,9 +329,16 @@ $stmt->close();
                         <label class="inline-label"><?php echo $lang_phone; ?>:
                             <input type="text" name="reservation[phone]">
                         </label>
+
                         <label class="inline-label"><?php echo $lang_vin; ?>:
-                            <input type="text" name="reservation[vin]" maxlength="17">
-                        </label>
+                            <input
+                                type="text"
+                                name="reservation[vin]"
+                                minlength="17"
+                                maxlength="17"
+                                pattern="[A-Za-z0-9]{17}">
+                            </label>
+
                         <label class="inline-label"><?php echo $lang_plate; ?>:
                             <input type="text" name="reservation[plate]">
                         </label>
@@ -350,6 +357,11 @@ $stmt->close();
                     <h2><?php echo $lang_edit_reservation; ?> - <a id="editReservationNumber" href="#" target="_blank" style="color: inherit; text-decoration: none;"></a></h2>
                     <form method="post" action="backend/update_reservation.php" id="editReservationForm">
                         <input type="hidden" name="reservation[slot_id]" id="editSlotId">
+                        <input type="hidden" name="reservation[nip]" id="editNip">
+                        <input type="hidden" name="reservation[receipt_or_invoice]" id="editReceiptOrInvoice">
+                        <input type="hidden" name="reservation[comment]" id="editComment">
+                        
+
 
                         <div class="edit-time-row">
                             <label><?php echo $lang_date; ?>:
@@ -398,10 +410,18 @@ $stmt->close();
                             <input type="text" name="reservation[phone]" id="editPhone">
                         </label>
 
+   
+
 
                         <label class="inline-label"><?php echo $lang_vin; ?>:
-                            <input type="text" name="reservation[vin]" id="editVin" maxlength="17">
-                        </label>
+                            <input 
+                                type="text" 
+                                name="reservation[vin]" 
+                                id="editVin" 
+                                minlength="17"
+                                maxlength="17"
+                                pattern="[A-Za-z0-9]{17}">                       
+                            </label>
 
 
 
@@ -477,7 +497,7 @@ $stmt->close();
                 firstCell = null;
             }
 
-            function openEditModal(slotId, mechanicId, title, description, phone, vin, plate, state, slotStart, slotEnd, date, createdDate, createdBy, updatedDate, updatedBy) {
+            function openEditModal(slotId, mechanicId, title, description, phone, vin, plate, state, slotStart, slotEnd, date, createdDate, createdBy, updatedDate, updatedBy, nip, receiptOrInvoice, comment) {
                 document.getElementById('editSlotId').value = slotId;
                 document.getElementById('editReservationNumber').textContent = 'REQ' + String(slotId).padStart(7, '0');
                 document.getElementById('editReservationNumber').href = 'reservation_details.php?slot_id=' + slotId;
@@ -496,6 +516,9 @@ $stmt->close();
                 document.getElementById('editUpdatedBy').textContent = updatedBy || '-';
                 document.getElementById('editReservationDate').value = date;
                 document.getElementById('editReservationStart').value = slotStart;
+                document.getElementById('editNip').value = nip;
+                document.getElementById('editReceiptOrInvoice').value = receiptOrInvoice;
+                document.getElementById('editComment').value = comment || '';
                 updateEditModalActions(date, slotStart);
                 document.getElementById('editModal').style.display = 'block';
 
@@ -535,8 +558,11 @@ $stmt->close();
                         const updatedBy = cell.dataset.updatedBy || '';
                         const state = cell.dataset.state || '';
                         const mechanicId = cell.dataset.mechanicId || '';
+                        const nip = cell.dataset.nip || '';
+                        const receiptOrInvoice = cell.dataset.receiptOrInvoice || '0';
+                        const comment = cell.dataset.comment || '';
 
-                        openEditModal(slotId, mechanicId, title, description, phone, vin, plate, state, slotStart, slotEnd, date, createdDate, createdBy, updatedDate, updatedBy);
+                        openEditModal(slotId, mechanicId, title, description, phone, vin, plate, state, slotStart, slotEnd, date, createdDate, createdBy, updatedDate, updatedBy, nip, receiptOrInvoice, comment);
                         return;
                     }
 
