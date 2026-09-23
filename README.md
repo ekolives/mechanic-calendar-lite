@@ -1,5 +1,34 @@
 # Mechanic Calendar Lite
 
+Mechanic Calendar Lite is a lightweight application for managing workshop bookings and employee schedules.
+
+## Free to Use
+
+The application is completely free to use.
+
+## Installation
+
+1. Copy the project files to a web server with PHP and MySQL/MariaDB support.
+2. Create a database and a MySQL user for the application.
+3. Open `install/index.php` in your web browser and follow the installation instructions.
+4. Once the installation is complete, log in to the administration panel.
+
+## Contact
+
+* Office: [office@ekolives.com](mailto:office@ekolives.com)
+* Developer: Dawid Dziobek
+
+## About the Project
+
+This project provides a simple way to manage a workshop calendar and customer bookings. It can be installed and used free of charge.
+
+## Support
+
+If you have any questions or encounter any problems, please contact us at [office@ekolives.com](mailto:office@ekolives.com).
+
+-------------------------------- PL ---------------------------------
+# Mechanic Calendar Lite
+
 Mechanic Calendar Lite to lekka aplikacja do zarządzania rezerwacjami warsztatu i grafikami pracowników.
 
 ## Darmowe użytkowanie

@@ -18,7 +18,7 @@ copies or substantial portions of the Software.
 ADDITIONAL CONDITION:
 Any use, distribution, or sale of this Software must retain the original footer
 attribution to ekolives (ITWS) in the following form:
-<p><a href="https://itws.pl" style="text-decoration: none; color: #fff;">ekolives (ITWS) &copy; </a> <?php echo date("Y"); ?></p>
+https://itws.pl - ekolives (ITWS)
 Removal or modification of this footer attribution is prohibited.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
