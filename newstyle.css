@@ -39,6 +39,14 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+@media (max-width: 600px) {
+  .container {
+    width: 70%;
+    box-sizing: border-box;
+    padding: 16px;
+  }
+}
+
 .faq {
   max-width: 800px;
   margin: 0 auto;

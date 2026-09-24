@@ -200,7 +200,7 @@ function mobile_weekday_name(DateTimeInterface $date): string
             <h1><?php echo mobile_h($lang_WebTitle); ?></h1>
         </div>
 
-        <a href="/sys-backend/logout.php" class="mobile-logout-button" aria-label="Logout">
+        <a href="../sys-backend/logout.php" class="mobile-logout-button" aria-label="Logout">
             <img src="../sys-backend/logout.png" alt="Wyloguj" height="27" width="27">
         </a>
     </div>
