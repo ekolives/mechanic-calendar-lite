@@ -36,6 +36,8 @@ require_once __DIR__ . '/../sys-backend/db_connect.php';
 /** @var string $lang_no */
 /** @var string $lang_cancelled */
 /** @var string $lang_slot_name */
+/** @var string $lang_this_week */
+/** @var string $lang_today */
 
 
 
@@ -73,6 +75,8 @@ if (isset($_GET['week'])) {
         $selectedDate->modify('-7 days');
     } elseif ($_GET['week'] === 'next') {
         $selectedDate->modify('+7 days');
+    } elseif ($_GET['week'] === 'today') {
+        $selectedDate = new DateTime();
     }
     $dateInput = $selectedDate->format('Y-m-d');
 }
@@ -83,6 +87,8 @@ if (isset($_GET['day'])) {
         $selectedDate->modify('-1 day');
     } elseif ($_GET['day'] === 'next') {
         $selectedDate->modify('+1 day');
+    } elseif ($_GET['day'] === 'today') {
+        $selectedDate = new DateTime();
     }
     $dateInput = $selectedDate->format('Y-m-d');
 }
@@ -243,7 +249,28 @@ $stmt->close();
     <div id="header">
         <?php require_once "../sys-backend/lang.php"; ?>
         <div id="logo">
-            <h3><?php echo "$lang_WebTitle - $userName"; ?></h3>
+
+                        <form method="get" style="display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; align-items: center; white-space: nowrap;">
+                            <input type="hidden" name="view" value="<?php echo htmlspecialchars($view); ?>">
+                            <input type="hidden" name="date" value="<?php echo htmlspecialchars($dateInput); ?>">
+                            <td><label> </label> </td>
+
+                        <?php
+                        if ($view == 'weekly') {
+
+                            echo '<button type="submit" name="week" value="prev" style="display: inline-block; flex: 0 0 auto;" class="button-green">← ' . $lang_prev_week . '</button>';
+                            echo '<button type="submit" name="week" value="today" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_this_week . '</button>';
+                            echo '<button type="submit" name="week" value="next" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_next_week . ' →</button>';
+                        } else {
+                            echo '<button type="submit" name="day" value="prev" style="display: inline-block; flex: 0 0 auto;" class="button-green">← ' . $lang_prev_day . '</button>';
+                            echo '<button type="submit" name="day" value="today" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_today . '</button>';
+                            echo '<button type="submit" name="day" value="next" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_next_day . ' →</button>';
+                        }
+                        echo "<h3>$lang_WebTitle - $userName</h3>";
+                        ?>
+
+                        </form>
+
         </div>
     </div>
 
@@ -254,23 +281,12 @@ $stmt->close();
                     <td>
                         <form method="get">
                             <input type="hidden" name="view" value="<?php echo htmlspecialchars($view); ?>">
-                    <td><label><?php echo $lang_date; ?>:
-                    <td><input type="date" name="date" value="<?php echo htmlspecialchars($dateInput); ?>"> </label>
-                    <td> <button type="submit"><?php echo $lang_show; ?></button>
-
-
-                        <?php
-
-                        if ($view == 'weekly') {
-                            echo '<td><button type="submit" name="week" value="prev">← ' . $lang_prev_week . '</button>';
-                            echo '<td><button type="submit" name="week" value="next">' . $lang_next_week . ' →</button>';
-                        } else {
-                            echo '<td><button type="submit" name="day" value="prev">← ' . $lang_prev_day . '</button>';
-                            echo '<td><button type="submit" name="day" value="next">' . $lang_next_day . ' →</button>';
-                        }
-                        ?>
-
+                            <td><label><?php echo $lang_date; ?>:</label></td>
+                            <td><input type="date" name="date" value="<?php echo htmlspecialchars($dateInput); ?>"> </td>
+                            <td> <button type="submit"><?php echo $lang_show; ?></button> </td>
                         </form>
+
+
                     <td><a href="../settings/index.php" style="margin-left: auto;" class="button-green">⚙ <?php echo $lang_settings; ?></a></td>
                     <td><a href="index.php?view=daily" style="margin-left: auto;" class="button-orange">📅 <?php echo $lang_daily_view; ?></a></td>
                     <td><a href="index.php?view=weekly" style="margin-left: auto;" class="button-orange"><?php echo $lang_weekly_view; ?> 📅</a>
@@ -337,7 +353,7 @@ $stmt->close();
                                 minlength="17"
                                 maxlength="17"
                                 pattern="[A-Za-z0-9]{17}">
-                            </label>
+                        </label>
 
                         <label class="inline-label"><?php echo $lang_plate; ?>:
                             <input type="text" name="reservation[plate]">
@@ -360,7 +376,7 @@ $stmt->close();
                         <input type="hidden" name="reservation[nip]" id="editNip">
                         <input type="hidden" name="reservation[receipt_or_invoice]" id="editReceiptOrInvoice">
                         <input type="hidden" name="reservation[comment]" id="editComment">
-                        
+
 
 
                         <div class="edit-time-row">
@@ -410,18 +426,18 @@ $stmt->close();
                             <input type="text" name="reservation[phone]" id="editPhone">
                         </label>
 
-   
+
 
 
                         <label class="inline-label"><?php echo $lang_vin; ?>:
-                            <input 
-                                type="text" 
-                                name="reservation[vin]" 
-                                id="editVin" 
+                            <input
+                                type="text"
+                                name="reservation[vin]"
+                                id="editVin"
                                 minlength="17"
                                 maxlength="17"
-                                pattern="[A-Za-z0-9]{17}">                       
-                            </label>
+                                pattern="[A-Za-z0-9]{17}">
+                        </label>
 
 
 

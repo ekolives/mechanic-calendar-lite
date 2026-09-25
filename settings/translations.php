@@ -14,7 +14,7 @@ if ($user_system_permissions != 1) {
         <th>Key</th>
         <th>Locale</th>
         <th>Translation </th>
-        <th>Action </th>
+        <th>Action <a href="add_translation.php" class="button">+</a></th>
     </tr>
 
     <?php
