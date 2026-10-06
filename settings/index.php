@@ -14,6 +14,8 @@ if ($user_system_permissions != 1) {
 /** @var string $lang_help */
 /** @var string $lang_slot_translations */
 /** @var string $lang_back */
+/** @var string $lang_settings */
+/** @var string $lang_back */
 
 
 
@@ -108,8 +110,9 @@ $activeTab = $_SESSION['active_tab'] ?? '1';
                 <div class="tab" data-tab="2"><?php echo $lang_users ?></div>
                 <div class="tab" data-tab="3"><?php echo $lang_help ?></div>
                 <div class="tab" data-tab="4"><?php echo $lang_slot_translations ?></div>
+                <div class="tab" data-tab="5"><?php echo $lang_settings ?></div>
 
-                <div class="tab" data-tab="5"><a href="../table/index.php" class="button-green"><?php echo $lang_back ?></a></div>
+                <div class="tab" data-tab="0"><a href="../table/index.php" class="button-green"><?php echo $lang_back ?></a></div>
             </div>
 
 
@@ -127,6 +130,12 @@ $activeTab = $_SESSION['active_tab'] ?? '1';
 
             <div id="tab-4" class="tab-content <?php echo ($activeTab === '4') ? 'active' : ''; ?>">
                 <?php include "translations.php"; ?>
+                </table><!-- translations.php nie domyka tabeli; domykamy ją tutaj, by kolejne taby nie zostały "wypchnięte" poza nią przez przeglądarkę -->
+            </div>
+            
+            <div id="tab-5" class="tab-content <?php echo ($activeTab === '5') ? 'active' : ''; ?>">
+                <?php include "settings.php"; ?>
+                </table><!-- settings.php (kopia translations.php) też nie domyka tabeli -->
             </div>
 
         </div>
@@ -143,7 +152,7 @@ $activeTab = $_SESSION['active_tab'] ?? '1';
                 const tabNum = tab.dataset.tab;
                 
                 // Pomiń link do kalendarza
-                if (tabNum === '5') return;
+                if (tabNum === '0') return;
                 
                 // Ustaw aktywny tab w UI
                 tabs.forEach(t => t.classList.remove('active'));

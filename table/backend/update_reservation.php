@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $receipt_or_invoice = trim($r['receipt_or_invoice'] ?? 'paragon');
         $nip = trim($r['nip'] ?? '');
         $comment = trim($r['comment'] ?? '');
+        $odometer = trim($r['odometer'] ?? '');
 
         $selectStmt = $conn->prepare('SELECT mechanic_id FROM calendar_slots WHERE slot_id = ?');
         $selectStmt->bind_param('s', $slotId);
@@ -99,12 +100,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          sys_updatedate = NOW(), 
          nip = ?, 
          receipt_or_invoice = ?,
-         comment = ?
+         comment = ?,
+         odometer = ?
 
          WHERE slot_id = ?'
                             );
                             $stmt->bind_param(
-                                'sssssssisiissss',
+                                'sssssssisiisssii',
                                 $slotStart,
                                 $slotEnd,
                                 $title,
@@ -119,6 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $nip,
                                 $receipt_or_invoice,
                                 $comment,
+                                $odometer,
                                 $slotId
                             );
                             if ($stmt->execute()) {

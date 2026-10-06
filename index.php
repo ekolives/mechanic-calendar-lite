@@ -160,7 +160,7 @@ if (isset($_POST['user_login'], $_POST['user_password'])) {
                     <input type="submit" value="<?php echo $lang_submit; ?>">
                 </form>
             </section>
-            <p class='credits'>ekolives &#x24D2; <?php echo date("Y"); ?> v 1.1.2</p>
+            <p class='credits'>ekolives &#x24D2; <?php echo date("Y"); ?> v 1.1.3</p>
         </div>
 
     </div>

@@ -195,6 +195,15 @@ $reservationNumber = 'REQ' . str_pad($slot['slot_id'], 7, '0', STR_PAD_LEFT);
                                 </td>
                             </tr>
 
+                                                        <tr>
+                                <th>Przebieg auta</th>
+                                <td>
+                                    <input type="text" name="reservation[odometer]"
+                                        value="<?php echo $slot['odometer']; ?>">
+                                </td>
+                            </tr>
+
+
                         </table>
                     </div>
                 </div>

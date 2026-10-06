@@ -267,6 +267,18 @@ $stmt->close();
                             echo '<button type="submit" name="day" value="next" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_next_day . ' →</button>';
                         }
                         echo "<h3>$lang_WebTitle - $userName</h3>";
+
+                        // opcjonalny link do zewnętrznej strony, pobierany z bazy danych
+                        $sql = "SELECT * FROM `settings` where `setting_name` = 'external_link' and status = 1";
+                        $result = $conn->query($sql);
+
+                        if ($result->num_rows > 0) {
+                            $row = $result->fetch_assoc();
+                            $externalLink = $row['setting_values'];
+                            $linkName = $row['setting_locale'];
+                            echo '<a href="' . htmlspecialchars($externalLink) . '" target="_blank" class="button">' . htmlspecialchars($linkName) . '</a>';
+
+                        }
                         ?>
 
                         </form>
