@@ -4,7 +4,7 @@ require_once __DIR__ . '/../sys-backend/db_connect.php';
 
 // last mont date definition
 $date_from = new DateTime();
-$date_from->modify('-6 month');
+$date_from->modify('-18 month');
 $date_to = new DateTime();
 $date_to->modify('+1 month');
 
