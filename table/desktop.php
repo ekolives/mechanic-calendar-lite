@@ -250,39 +250,52 @@ $stmt->close();
         <?php require_once "../sys-backend/lang.php"; ?>
         <div id="logo">
 
-                        <form method="get" style="display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; align-items: center; white-space: nowrap;">
-                            <input type="hidden" name="view" value="<?php echo htmlspecialchars($view); ?>">
-                            <input type="hidden" name="date" value="<?php echo htmlspecialchars($dateInput); ?>">
-                            <td><label> </label> </td>
+            <form method="get" style="display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; align-items: center; white-space: nowrap;">
+                <input type="hidden" name="view" value="<?php echo htmlspecialchars($view); ?>">
+                <input type="hidden" name="date" value="<?php echo htmlspecialchars($dateInput); ?>">
+                <td><label> </label> </td>
 
-                        <?php
-                        if ($view == 'weekly') {
+                <?php
+                if ($view == 'weekly') {
 
-                            echo '<button type="submit" name="week" value="prev" style="display: inline-block; flex: 0 0 auto;" class="button-green">← ' . $lang_prev_week . '</button>';
-                            echo '<button type="submit" name="week" value="today" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_this_week . '</button>';
-                            echo '<button type="submit" name="week" value="next" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_next_week . ' →</button>';
-                        } else {
-                            echo '<button type="submit" name="day" value="prev" style="display: inline-block; flex: 0 0 auto;" class="button-green">← ' . $lang_prev_day . '</button>';
-                            echo '<button type="submit" name="day" value="today" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_today . '</button>';
-                            echo '<button type="submit" name="day" value="next" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_next_day . ' →</button>';
-                        }
-                        echo "<h3>$lang_WebTitle - $userName</h3>";
+                    echo '<button type="submit" name="week" value="prev" style="display: inline-block; flex: 0 0 auto;" class="button-green">← ' . $lang_prev_week . '</button>';
+                    echo '<button type="submit" name="week" value="today" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_this_week . '</button>';
+                    echo '<button type="submit" name="week" value="next" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_next_week . ' →</button>';
+                } else {
+                    echo '<button type="submit" name="day" value="prev" style="display: inline-block; flex: 0 0 auto;" class="button-green">← ' . $lang_prev_day . '</button>';
+                    echo '<button type="submit" name="day" value="today" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_today . '</button>';
+                    echo '<button type="submit" name="day" value="next" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_next_day . ' →</button>';
+                }
+                echo "<h3>$lang_WebTitle - $userName</h3>";
 
-                        // opcjonalny link do zewnętrznej strony, pobierany z bazy danych
-                        $sql = "SELECT * FROM `settings` where `setting_name` = 'external_link' and status = 1";
-                        $result = $conn->query($sql);
 
-                        if ($result->num_rows > 0) {
-                            $row = $result->fetch_assoc();
-                            $externalLink = $row['setting_values'];
-                            $linkName = $row['setting_locale'];
-                            echo '<a href="' . htmlspecialchars($externalLink) . '" target="_blank" class="button">' . htmlspecialchars($linkName) . '</a>';
+                // link z obrazkiem ../sys_backend/clipboard-list.svg 
+                echo '<a href="reservation_list.php"
+         style="margin-left: auto; display: inline-flex; align-items: center;"
+         title="' . htmlspecialchars($lang_reservation_list, ENT_QUOTES, 'UTF-8') . '"
+         aria-label="' . htmlspecialchars($lang_reservation_list, ENT_QUOTES, 'UTF-8') . '">
+         <img src="../sys-backend/clipboard-list.svg" style="width: 32px; height: 32px;"></a>';
 
-                        }
-                        ?>
 
-                        </form>
+                // link z obrazkiem ../sys_backend/settings.svg 
+                echo '<a href="../settings/index.php"
+         style="margin-left: auto; display: inline-flex; align-items: center;"
+         title="' . htmlspecialchars($lang_settings, ENT_QUOTES, 'UTF-8') . '"
+         aria-label="' . htmlspecialchars($lang_settings, ENT_QUOTES, 'UTF-8') . '">
+         <img src="../sys-backend/settings.svg" style="width: 32px; height: 32px;"></a>';
 
+
+                // opcjonalny link do zewnętrznej strony, pobierany z bazy danych
+                $sql = "SELECT * FROM `settings` where `setting_name` = 'external_link' and status = 1";
+                $result = $conn->query($sql);
+                if ($result->num_rows > 0) {
+                    $row = $result->fetch_assoc();
+                    $externalLink = $row['setting_values'];
+                    $linkName = $row['setting_locale'];
+                    echo '<a href="' . htmlspecialchars($externalLink) . '" style="margin-left: auto; display: inline-flex; align-items: center" target="_blank" class="button" >' . htmlspecialchars($linkName) . '</a>';
+                }
+                ?>
+            </form>
         </div>
     </div>
 
@@ -293,16 +306,13 @@ $stmt->close();
                     <td>
                         <form method="get">
                             <input type="hidden" name="view" value="<?php echo htmlspecialchars($view); ?>">
-                            <td><label><?php echo $lang_date; ?>:</label></td>
-                            <td><input type="date" name="date" value="<?php echo htmlspecialchars($dateInput); ?>"> </td>
-                            <td> <button type="submit"><?php echo $lang_show; ?></button> </td>
-                        </form>
+                    <td><label><?php echo $lang_date; ?>:</label></td>
+                    <td><input type="date" name="date" value="<?php echo htmlspecialchars($dateInput); ?>"> </td>
+                    <td><button type="submit"><?php echo $lang_show; ?></button> </td>
+                    </form>
 
-
-                    <td><a href="../settings/index.php" style="margin-left: auto;" class="button-green">⚙ <?php echo $lang_settings; ?></a></td>
                     <td><a href="index.php?view=daily" style="margin-left: auto;" class="button-orange">📅 <?php echo $lang_daily_view; ?></a></td>
                     <td><a href="index.php?view=weekly" style="margin-left: auto;" class="button-orange"><?php echo $lang_weekly_view; ?> 📅</a>
-                    <td><a href="reservation_list.php" style="margin-left: auto;" class="button-green">☷ <?php echo $lang_reservation_list; ?></a>
 
                 </tr>
             </table>
