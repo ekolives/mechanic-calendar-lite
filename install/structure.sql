@@ -255,7 +255,8 @@ CREATE TABLE `permissions` (
   `sys_updatedby` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `mechanic_id` int(11) NOT NULL,
-  `status` int(11) NOT NULL
+  `status` int(11) NOT NULL,
+  `notification` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
@@ -282,6 +283,28 @@ CREATE TABLE `settings` (
 -- --------------------------------------------------------
 
 --
+-- Struktura tabeli dla tabeli `smtp_settings`
+--
+
+CREATE TABLE `smtp_settings` (
+  `id` int(11) NOT NULL,
+  `smtp_enabled` tinyint(1) NOT NULL DEFAULT 1,
+  `smtp_host` varchar(255) NOT NULL,
+  `smtp_port` int(5) NOT NULL DEFAULT 587,
+  `smtp_encryption` varchar(10) NOT NULL DEFAULT 'tls',
+  `smtp_auth` tinyint(1) NOT NULL DEFAULT 1,
+  `smtp_username` varchar(255) NOT NULL,
+  `smtp_password` text NOT NULL,
+  `from_email` varchar(255) NOT NULL,
+  `from_name` varchar(255) NOT NULL DEFAULT 'Kalendarz Mechanika',
+  `reply_to_email` varchar(255) DEFAULT NULL,
+  `sys_updatedby` varchar(255) DEFAULT NULL,
+  `sys_updatedate` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Struktura tabeli dla tabeli `users`
 --
 
@@ -294,15 +317,16 @@ CREATE TABLE `users` (
   `user_login` varchar(255) NOT NULL,
   `user_status` int(11) NOT NULL,
   `user_password` char(64) NOT NULL,
-  `user_permissions` int(11) NOT NULL
+  `user_permissions` int(11) NOT NULL,
+  `user_email` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
 -- Zrzut danych tabeli `users`
 --
 
-INSERT INTO `users` (`user_id`, `sys_submiter`, `sys_createdate`, `sys_updatedby`, `sys_updatedate`, `user_login`, `user_status`, `user_password`, `user_permissions`) VALUES
-(1, 'InstallAdmin', '2026-01-01 00:00:02', 'InstallAdmin', '2026-06-08 15:41:48', 'admin', 1, '$2y$10$spZhjceuR/EQd8ifBOszlu0t/WSJ47UaAYbTxOTHvOgiZaDZcIQEO', 1);
+INSERT INTO `users` (`user_id`, `sys_submiter`, `sys_createdate`, `sys_updatedby`, `sys_updatedate`, `user_login`, `user_status`, `user_password`, `user_permissions`, `user_email`) VALUES
+(1, 'InstallAdmin', '2026-01-01 00:00:02', 'InstallAdmin', '2026-06-08 15:41:48', 'admin', 1, '$2y$10$spZhjceuR/EQd8ifBOszlu0t/WSJ47UaAYbTxOTHvOgiZaDZcIQEO', 1, NULL);
 
 --
 -- Indeksy dla zrzutów tabel
@@ -343,6 +367,12 @@ ALTER TABLE `permissions`
 --
 ALTER TABLE `settings`
   ADD PRIMARY KEY (`sys_id`);
+
+--
+-- Indeksy dla tabeli `smtp_settings`
+--
+ALTER TABLE `smtp_settings`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indeksy dla tabeli `users`
@@ -393,6 +423,12 @@ ALTER TABLE `permissions`
 --
 ALTER TABLE `settings`
   MODIFY `sys_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- AUTO_INCREMENT dla tabeli `smtp_settings`
+--
+ALTER TABLE `smtp_settings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT dla tabeli `users`

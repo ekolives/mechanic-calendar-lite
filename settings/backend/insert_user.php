@@ -9,6 +9,7 @@ if (isset($_POST['user_login'], $_POST['user_password'], $_POST['permissions'], 
     $user_password = $_POST['user_password'];
     $user_permissions = $_POST['permissions'];
     $status = $_POST['status'];
+    $user_email = $_POST['user_email'];
 
 
     $passwordHash = password_hash($user_password, PASSWORD_DEFAULT);
@@ -17,15 +18,16 @@ if (isset($_POST['user_login'], $_POST['user_password'], $_POST['permissions'], 
         user_password, 
         user_permissions, 
         user_status,
+        user_email,
         sys_submiter,
         sys_createdate,
         sys_updatedby,
         sys_updatedate
         ) 
     
-    VALUES (?, ?, ?, ?, ?, NOW(), ?, NOW())";
+    VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, NOW())";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssiiii", $user_login, $passwordHash, $user_permissions, $status, $userId, $userId);
+    $stmt->bind_param("sssisii", $user_login, $passwordHash, $user_permissions, $status, $user_email, $userId, $userId);
     $stmt->execute();
     $stmt->close();
     $conn->close();

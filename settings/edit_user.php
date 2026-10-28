@@ -11,7 +11,7 @@ $workerId = $_GET['id'] ?? null;
 if (!$workerId) {
     die("Nie podano ID pracownika.");
 }
-$stmt = $conn->prepare("SELECT user_id, user_login , user_permissions, user_status FROM users WHERE user_id = ?");
+$stmt = $conn->prepare("SELECT user_id, user_login , user_permissions, user_status, user_email FROM users WHERE user_id = ?");
 $stmt->bind_param("i", $workerId);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -67,6 +67,13 @@ $stmt->close();
                         </td>
                     </tr>
 
+                    <tr>
+                        <td><label>Email:</label></td>
+                        <td>
+                            <input type="email" name="user_email" value="<?php echo $worker['user_email']; ?>">
+                        </td>
+                    </tr>
+
 
                     <tr>
                         <td><label>Typ:</label></td>
@@ -80,45 +87,53 @@ $stmt->close();
                     </tr>
 
 
-<tr>
-    <td><label>Uprawnienia do:</label></td>
-    <td>
-        <div class="mechanics-list">
-            <?php
-            $stmt = $conn->prepare("SELECT mechanic_id, mechanic_name FROM mechanics");
-            $stmt->execute();
-            $mechanics = $stmt->get_result();
-            $stmt->close();
+                    <tr>
+                        <td><label>Uprawnienia do:</label></td>
+                        <td>
+                            <div class="mechanics-list">
+                                <?php
+                                $stmt = $conn->prepare("SELECT mechanic_id, mechanic_name FROM mechanics");
+                                $stmt->execute();
+                                $mechanics = $stmt->get_result();
+                                $stmt->close();
 
-            while ($mechanic = $mechanics->fetch_assoc()) {
+                                while ($mechanic = $mechanics->fetch_assoc()) {
 
-                $mechanicid = $mechanic['mechanic_id'];
-                $mechanic_name = $mechanic['mechanic_name'];
+                                    $mechanicid = $mechanic['mechanic_id'];
+                                    $mechanic_name = $mechanic['mechanic_name'];
 
-                $stmt = $conn->prepare("
-                    SELECT user_id, mechanic_id, status
+                                    $stmt = $conn->prepare("
+                    SELECT *
                     FROM permissions
                     WHERE user_id = ? AND mechanic_id = ?
                 ");
-                $stmt->bind_param("ii", $workerId, $mechanicid);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $stmt->close();
+                                    $stmt->bind_param("ii", $workerId, $mechanicid);
+                                    $stmt->execute();
+                                    $result = $stmt->get_result();
+                                    $permRow = $result->fetch_assoc();
+                                    $stmt->close();
 
-                $checked = $result->num_rows > 0 ? 'checked' : '';
+                                    $checked = $permRow ? 'checked' : '';
+                                    $notifyChecked = !empty($permRow['notification']) ? 'checked' : '';
 
-                echo '
-                <label class="mechanic-item">
-                    <input type="checkbox" name="mechanics[]" value="' . $mechanicid . '" ' . $checked . '>
-                    ' . htmlspecialchars($mechanic_name) . '
-                </label>';
-            }
+                                    echo '
+                <div class="mechanic-item" style="display: flex; align-items: center; justify-content: space-between; gap: 20px; max-width: 420px;">
+                    <label style="margin-bottom: 0; cursor: pointer;">
+                        <input type="checkbox" name="mechanics[]" value="' . $mechanicid . '" ' . $checked . '>
+                        ' . htmlspecialchars($mechanic_name) . '
+                    </label>
+                    <label style="margin-bottom: 0; cursor: pointer;">
+                        <input type="checkbox" name="notifications[]" value="' . $mechanicid . '" ' . $notifyChecked . '>
+                        wysyłaj powiadomienie
+                    </label>
+                </div>';
+                                }
 
-            $mechanics->free();
-            ?>
-        </div>
-    </td>
-</tr>
+                                $mechanics->free();
+                                ?>
+                            </div>
+                        </td>
+                    </tr>
 
 
                     <tr>

@@ -48,6 +48,12 @@ if ($user_system_permissions != 1) {
 </td>
 </tr>
 
+<tr>
+<td><label>Email:</label></td><td>
+<input type="email" name="user_email" value="">
+</td>
+</tr>
+
 
 <tr>
 <td><label>Uprawnienie:</label></td><td>

@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../sys-backend/session_config.php';
 require_once __DIR__ . '/../../sys-backend/db_connect.php';
 require_once  __DIR__ . '/../../sys-backend/audit.php';
+require_once __DIR__ . '/../../sys-backend/mailer.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -96,12 +97,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $userId,
                         $userId
                     );
-                    $_SESSION['reservation_success'] = 'Rezerwacja została pomyślnie dodana.';
 
-                    $audit_log_data ="mechanicId = $mechanicId,slotDate = $slotDate,slotStart = $slotStart,slotEnd = $slotEnd,title = $title,reservation_description = $reservation_description,phone = $phone,vin = $vin,plate = $plate";
-                    audit_log($conn, $userName, 'Create reservation',  $audit_log_data);
+                    if ($stmt->execute()) {
+                        $_SESSION['reservation_success'] = 'Rezerwacja została pomyślnie dodana.';
 
-                    $stmt->execute();
+                        $audit_log_data ="mechanicId = $mechanicId,slotDate = $slotDate,slotStart = $slotStart,slotEnd = $slotEnd,title = $title,reservation_description = $reservation_description,phone = $phone,vin = $vin,plate = $plate";
+                        audit_log($conn, $userName, 'Create reservation',  $audit_log_data);
+
+                        // powiadomienie o stworzonej rezerwacji
+                        $notifyStmt = $conn->prepare(
+                            "SELECT u.user_login, u.user_email
+                             FROM permissions p
+                             INNER JOIN users u ON u.user_id = p.user_id
+                             WHERE p.mechanic_id = ?
+                               AND p.status = 1
+                               AND p.notification = 1
+                               AND u.user_status = 1
+                               AND u.user_email IS NOT NULL
+                               AND u.user_email != ''"
+                        );
+                        $notifyStmt->bind_param("i", $mechanicId);
+                        $notifyStmt->execute();
+                        $notifyResult = $notifyStmt->get_result();
+
+                        $mechanicNameSafe = htmlspecialchars($mechanic['mechanic_name'] ?? '', ENT_QUOTES, 'UTF-8');
+                        $slotDateSafe = htmlspecialchars($slotDate, ENT_QUOTES, 'UTF-8');
+                        $slotStartSafe = htmlspecialchars($slotStart, ENT_QUOTES, 'UTF-8');
+                        $slotEndSafe = htmlspecialchars($slotEnd, ENT_QUOTES, 'UTF-8');
+                        $titleSafe = htmlspecialchars($title ?: '-', ENT_QUOTES, 'UTF-8');
+                        $descSafe = nl2br(htmlspecialchars($reservation_description ?: '-', ENT_QUOTES, 'UTF-8'));
+                        $phoneSafe = htmlspecialchars($phone ?: '-', ENT_QUOTES, 'UTF-8');
+                        $plateSafe = htmlspecialchars($plate ?: '-', ENT_QUOTES, 'UTF-8');
+                        $vinSafe = htmlspecialchars($vin ?: '-', ENT_QUOTES, 'UTF-8');
+                        $authorSafe = htmlspecialchars($userName ?? '-', ENT_QUOTES, 'UTF-8');
+
+                        $emailSubject = "Nowa rezerwacja: {$mechanic['mechanic_name']} ({$slotDate} {$slotStart}-{$slotEnd})";
+                        $emailHtmlBody = "
+                            <h3>Utworzono nową rezerwację w kalendarzu</h3>
+                            <table border='1' cellpadding='6' cellspacing='0' style='border-collapse: collapse; font-family: Arial, sans-serif;'>
+                                <tr><th align='left' style='background:#f2f2f2;'>Mechanik / Slot</th><td>{$mechanicNameSafe}</td></tr>
+                                <tr><th align='left' style='background:#f2f2f2;'>Data</th><td>{$slotDateSafe}</td></tr>
+                                <tr><th align='left' style='background:#f2f2f2;'>Godziny</th><td>{$slotStartSafe} – {$slotEndSafe}</td></tr>
+                                <tr><th align='left' style='background:#f2f2f2;'>Tytuł</th><td>{$titleSafe}</td></tr>
+                                <tr><th align='left' style='background:#f2f2f2;'>Opis</th><td>{$descSafe}</td></tr>
+                                <tr><th align='left' style='background:#f2f2f2;'>Telefon</th><td>{$phoneSafe}</td></tr>
+                                <tr><th align='left' style='background:#f2f2f2;'>Nr rejestracyjny</th><td>{$plateSafe}</td></tr>
+                                <tr><th align='left' style='background:#f2f2f2;'>VIN</th><td>{$vinSafe}</td></tr>
+                                <tr><th align='left' style='background:#f2f2f2;'>Utworzył(a)</th><td>{$authorSafe}</td></tr>
+                            </table>
+                        ";
+
+                        while ($notifyRow = $notifyResult->fetch_assoc()) {
+                            $userEmail = $notifyRow['user_email'];
+                            $userLogin = $notifyRow['user_login'];
+                            // tutaj możesz wysłać powiadomienie e-mail do $userEmail
+                            sendEmailNotification($conn, $userEmail, $userLogin, $emailSubject, $emailHtmlBody);
+                            audit_log($conn, $userName, 'Notification sent to ' . $userEmail,  $audit_log_data   );
+                            }
+
+                        $notifyStmt->close();
+                    } else {
+                        $_SESSION['reservation_error'] = 'Nie udało się zapisać rezerwacji.';
+                    }
+
                     $stmt->close();
                 }
             } else {

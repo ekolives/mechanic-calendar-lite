@@ -416,8 +416,10 @@ option {
   color: #155724;
   padding: 12px;
   border-radius: 4px;
+  margin-top: 60px;
   margin-bottom: 20px;
-  border: 1px solid #c3e6cb;
+  font-size: 25px;
+  border: 2px solid #014c12;
 }
 
 .error-message {
@@ -425,8 +427,10 @@ option {
   color: #721c24;
   padding: 12px;
   border-radius: 4px;
+  margin-top: 60px;
   margin-bottom: 20px;
-  border: 1px solid #f5c6cb;
+  font-size: 25px;
+  border: 2px solid #c10316;
 }
 
 th {
