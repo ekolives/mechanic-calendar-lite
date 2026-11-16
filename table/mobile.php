@@ -188,8 +188,8 @@ function mobile_weekday_name(DateTimeInterface $date): string
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title><?php echo mobile_h($lang_WebTitle); ?></title>
-    <link rel="stylesheet" href="../newstyle.css">
-    <link rel="stylesheet" href="../mobile.css?v=2">
+    <link rel="stylesheet" href="../newstyle.css?v=<?php echo filemtime(__DIR__ . '/../newstyle.css'); ?>">
+    <link rel="stylesheet" href="../mobile.css?v=<?php echo filemtime(__DIR__ . '/../mobile.css'); ?>">
 </head>
 
 <body class="mobile-calendar-page">

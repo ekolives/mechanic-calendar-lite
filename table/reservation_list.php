@@ -27,25 +27,40 @@ if (isset($_GET['date_to']) && !empty($_GET['date_to'])) {
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../newstyle.css" />
+    <link rel="stylesheet" href="../newstyle.css?v=<?php echo filemtime(__DIR__ . '/../newstyle.css'); ?>" />
 </head>
 
 <body>
 
-    <div id="header">
-        <?php include "../sys-backend/lang.php"; ?>
-        <div id="logo">
-            <h3>Lista rezerwacji</h3>
+    <?php
+    ob_start();
+    include "../sys-backend/lang.php";
+    $languageControls = ob_get_clean();
+    ?>
+    <div id="header" class="calendar-header">
+        <div class="calendar-toolbar">
+            <div class="calendar-toolbar-row calendar-toolbar-primary">
+                <h3 class="desktop-toolbar-title">
+                    <span class="brand-name"><?php echo htmlspecialchars($lang_WebTitle ?? 'Kalendarz', ENT_QUOTES, 'UTF-8'); ?></span>
+                    <span class="brand-user"><?php echo htmlspecialchars((string) $userName, ENT_QUOTES, 'UTF-8'); ?></span>
+                </h3>
+
+                <div class="desktop-toolbar-actions">
+                    <a href="index.php" class="button desktop-toolbar-external-link">← <?php echo htmlspecialchars($lang_back ?? 'Kalendarz', ENT_QUOTES, 'UTF-8'); ?></a>
+                </div>
+
+                <div class="calendar-header-tools">
+                    <?php echo $languageControls; ?>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="wrapper">
         <form method="get" action="reservation_list.php">
-            <table>
-                <tr>
-                    <th class="reservation-filter-label">Slot</th>
-
-                    <td>
+            <div class="filter-card">
+                <div class="filter-field">
+                    <label>Slot</label>
 <?php
 // get available slots from SELECT * FROM `mechanics`
 $stmt = $conn->prepare("SELECT mechanic_id, mechanic_name FROM mechanics");
@@ -64,40 +79,47 @@ while ($mechanic = $mechanics->fetch_assoc()) {
     $isSelected = ($selectedMechanic == $mechanic['mechanic_id']) ? 'selected' : '';
 
     echo '<option value="' . $mechanic['mechanic_id'] . '" ' . $isSelected . '>'
-        . $mechanic['mechanic_name'] .
+        . htmlspecialchars((string) $mechanic['mechanic_name'], ENT_QUOTES, 'UTF-8') .
         '</option>';
 }
 
 echo '</select>';
 ?>
+                </div>
 
-                    </td>
+                <div class="filter-field">
+                    <label>Data od</label>
+                    <input type="date" name="date_from" value="<?php echo $date_from->format('Y-m-d'); ?>">
+                </div>
+                <div class="filter-field">
+                    <label>Data do</label>
+                    <input type="date" name="date_to" value="<?php echo $date_to->format('Y-m-d'); ?>">
+                </div>
+                <div class="filter-field filter-field-wide">
+                    <label>Treść</label>
+                    <input type="text" name="reservation_search" value="<?php echo htmlspecialchars($_GET['reservation_search'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+                </div>
+                <div class="filter-field">
+                    <label>Telefon</label>
+                    <input type="text" name="reservation_phone" value="<?php echo htmlspecialchars($_GET['reservation_phone'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 130px;" />
+                </div>
+                <div class="filter-field">
+                    <label>VIN</label>
+                    <input type="text" name="reservation_vin" value="<?php echo htmlspecialchars($_GET['reservation_vin'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 180px;" />
+                </div>
+                <div class="filter-field">
+                    <label>Rejestracja</label>
+                    <input type="text" name="reservation_plate" value="<?php echo htmlspecialchars($_GET['reservation_plate'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 110px;" />
+                </div>
+                <div class="filter-field filter-field-check">
+                    <label class="filter-check"><input type="checkbox" name="reservation_rejected" value="1" <?php echo isset($_GET['reservation_rejected']) ? 'checked' : ''; ?>> Odwołana</label>
+                </div>
 
-                    <th class="reservation-filter-label"> Data od </th>
-                    <td><input type="date" name="date_from" value="<?php echo $date_from->format('Y-m-d'); ?>"></td>
-                    <th class="reservation-filter-label"> Data do </th>
-                    <td><input type="date" name="date_to" value="<?php echo $date_to->format('Y-m-d'); ?>"></td>
-                    <td><button class="button-green">Filtruj</button></td>
-                    <td style="text-align: center;"><a href="reservation_list.php" class="button-red">Wyczyść filtr</a></td>
-                    <td><a href="index.php" class="button">Kalendarz</a></td>
-                    <td></td>
-                </tr>
-
-                <tr>
-                     <th class="reservation-filter-label">Treść</th>
-                    <td><input type="text" name="reservation_search" value="<?php echo htmlspecialchars($_GET['reservation_search'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" /></td>
-                    <th class="reservation-filter-label">Telefon</th>
-                    <td><input type="text" name="reservation_phone" value="<?php echo htmlspecialchars($_GET['reservation_phone'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 120px;" /></td>
-                    <th>VIN</th>
-                    <td><input type="text" name="reservation_vin" value="<?php echo htmlspecialchars($_GET['reservation_vin'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 170px;" /></td>
-                    <th class="reservation-filter-label">Rejestracja</th>
-                    <td><input type="text" name="reservation_plate" value="<?php echo htmlspecialchars($_GET['reservation_plate'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 100px;" /></td>
-                    <th>Odwołana?</th>
-                    <td style="text-align: center; "><input type="checkbox" name="reservation_rejected" value="1" <?php echo isset($_GET['reservation_rejected']) ? 'checked' : ''; ?>>Tak</td>
-                    </td>
-
-                </tr>
-            </table>
+                <div class="filter-actions">
+                    <button type="submit" class="filter-submit">Filtruj</button>
+                    <a href="reservation_list.php" class="filter-clear">Wyczyść filtr</a>
+                </div>
+            </div>
 
 
             <div id="content">

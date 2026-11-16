@@ -13,8 +13,10 @@ require_once __DIR__ . '/../sys-backend/session_config.php';
 
 <?php foreach ($days as $day): ?>
     <?php $dayKey = $day->format('Y-m-d'); ?>
-    <h2><?php echo htmlspecialchars(localizedWeekdayName($day) . ' ' . $day->format('d.m.Y')); ?></h2>
-    <table>
+    <section class="daily-calendar-day">
+        <h2 class="daily-date-heading"><?php echo htmlspecialchars(localizedWeekdayName($day) . ' ' . $day->format('d.m.Y')); ?></h2>
+        <div class="daily-schedule-scroll">
+            <table class="daily-schedule">
         <tr>
             <th>Mechanik / godzina</th>
             <?php foreach ($slots as $slotTime): ?>
@@ -104,5 +106,7 @@ require_once __DIR__ . '/../sys-backend/session_config.php';
                 ?>
             </tr>
         <?php endforeach; ?>
-    </table>
+            </table>
+        </div>
+    </section>
 <?php endforeach; ?>

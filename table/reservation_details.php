@@ -28,7 +28,7 @@ $reservationNumber = 'REQ' . str_pad($slot['slot_id'], 7, '0', STR_PAD_LEFT);
 
 <head>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="../newstyle.css" />
+    <link rel="stylesheet" href="../newstyle.css?v=<?php echo filemtime(__DIR__ . '/../newstyle.css'); ?>" />
 </head>
 
 <body>

@@ -16,11 +16,11 @@ $logoutImg = $baseUrl . '/sys-backend/logout.png';
 
 
 echo "
-<div style=\"margin-right:10px; margin-top:5px; width:auto; float:right\">
-<a href=\"{$logoutUrl}\"><img src=\"{$logoutImg}\" height=\"27\" width=\"27\"/></a></div>
+<div class=\"header-logout-control\">
+<a href=\"{$logoutUrl}\" aria-label=\"Logout\"><img src=\"{$logoutImg}\" height=\"27\" width=\"27\" alt=\"\"/></a></div>
 
-<div style=\"margin-right:20px; margin-top:5px; width:auto; float:right\">
-<form name=\"lang\" action=\"\" method=\"POST\">
+<div class=\"header-language-control\">
+<form name=\"lang\" class=\"header-language-form\" action=\"\" method=\"POST\">
         <div><input type=\"submit\" value=\"pl\" name=\"lang\" onclick=\"pl\" />
         <input type=\"submit\" value=\"en\" name=\"lang\" onclick=\"en\" /></div>
     </form>

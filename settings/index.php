@@ -39,31 +39,33 @@ $activeTab = $_SESSION['active_tab'] ?? '1';
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../newstyle.css" />
+    <link rel="stylesheet" href="../newstyle.css?v=<?php echo filemtime(__DIR__ . '/../newstyle.css'); ?>" />
 
     
     <style>
         /* Styl zakładek */
-        .tabs {
-            display: flex;
-            border-bottom: 2px solid #ccc;
-            margin-bottom: 10px;
-        }
-
-        .tab {
-            padding: 10px 20px;
+        .tabs .tab {
+            padding: 7px 14px;
             cursor: pointer;
-            border: 1px solid #ccc;
-            border-bottom: none;
-            background: #f0f0f0;
-            margin-right: 5px;
-            border-radius: 8px 8px 0 0;
+            border-radius: 7px;
+            color: #e2e8f0;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: background .15s;
         }
 
-        .tab.active {
-            background: #fff;
-            font-weight: bold;
-            border-bottom: 2px solid white;
+        .tabs .tab:hover {
+            background: rgba(255, 255, 255, .14);
+        }
+
+        .tabs .tab.active {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        #header.calendar-header + #wrapper {
+            padding-top: 16px;
         }
 
         .tab-content {
@@ -90,30 +92,41 @@ $activeTab = $_SESSION['active_tab'] ?? '1';
 
 <body>
 
-    <div id="header">
-        <?php include "../sys-backend/lang.php"; ?>
-        <div id="logo">
-            <h3>Kalendarz</h3>
+    <?php
+    ob_start();
+    include "../sys-backend/lang.php";
+    $languageControls = ob_get_clean();
+    ?>
+    <div id="header" class="calendar-header">
+        <div class="calendar-toolbar">
+            <div class="calendar-toolbar-row calendar-toolbar-primary">
+                <h3 class="desktop-toolbar-title">
+                    <span class="brand-name"><?php echo htmlspecialchars($lang_WebTitle ?? 'Kalendarz', ENT_QUOTES, 'UTF-8'); ?></span>
+                    <span class="brand-user"><?php echo htmlspecialchars((string) $userName, ENT_QUOTES, 'UTF-8'); ?></span>
+                </h3>
+
+                <!-- Zakładki -->
+                <div class="tabs desktop-calendar-nav">
+                    <div class="tab" data-tab="1"><?php echo $lang_slot_name ?></div>
+                    <div class="tab" data-tab="2"><?php echo $lang_users ?></div>
+                    <div class="tab" data-tab="3"><?php echo $lang_help ?></div>
+                    <div class="tab" data-tab="4"><?php echo $lang_slot_translations ?></div>
+                    <div class="tab" data-tab="5"><?php echo $lang_settings ?></div>
+                </div>
+
+                <div class="desktop-toolbar-actions">
+                    <a href="../table/index.php" class="button desktop-toolbar-external-link" data-tab="0">← <?php echo $lang_back ?></a>
+                </div>
+
+                <div class="calendar-header-tools">
+                    <?php echo $languageControls; ?>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="wrapper">
         <div id="content">
-
-        
-
-
-
-            <!-- Zakładki -->
-            <div class="tabs">
-                <div class="tab" data-tab="1"><?php echo $lang_slot_name ?></div>
-                <div class="tab" data-tab="2"><?php echo $lang_users ?></div>
-                <div class="tab" data-tab="3"><?php echo $lang_help ?></div>
-                <div class="tab" data-tab="4"><?php echo $lang_slot_translations ?></div>
-                <div class="tab" data-tab="5"><?php echo $lang_settings ?></div>
-
-                <div class="tab" data-tab="0"><a href="../table/index.php" class="button-green"><?php echo $lang_back ?></a></div>
-            </div>
 
 
             <div id="tab-1" class="tab-content <?php echo ($activeTab === '1') ? 'active' : ''; ?>">

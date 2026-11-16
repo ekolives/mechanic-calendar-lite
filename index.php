@@ -20,7 +20,7 @@ if (!is_readable($configFile)) {
 <head>
     <meta charset=\"utf-8\" />
     <title>Brak konfiguracji</title>
-    <link rel=\"stylesheet\" href=\"newstyle.css\" />
+    <link rel=\"stylesheet\" href=\"newstyle.css?v=" . filemtime(__DIR__ . "/newstyle.css") . "\" />
 </head>
 <body>
     <div id=\"wrapper\">
@@ -57,7 +57,7 @@ if ($conn->connect_error) {
 <head>
     <meta charset=\"utf-8\" />
     <title>Brak połączenia z bazą</title>
-    <link rel=\"stylesheet\" href=\"newstyle.css\" />
+    <link rel=\"stylesheet\" href=\"newstyle.css?v=" . filemtime(__DIR__ . "/newstyle.css") . "\" />
 </head>
 <body>
     <div id=\"wrapper\">
@@ -133,7 +133,7 @@ if (isset($_POST['user_login'], $_POST['user_password'])) {
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="newstyle.css" />
+    <link rel="stylesheet" href="newstyle.css?v=<?php echo filemtime(__DIR__ . '/newstyle.css'); ?>" />
 </head>
 
 <body>

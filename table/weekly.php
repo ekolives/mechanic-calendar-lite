@@ -13,12 +13,12 @@ foreach ($days as $day): ?>
     $isToday = ($dayKey === date('Y-m-d'));
     ?>
 
-    <h2 <?php echo $isToday ? 'id="today-day"' : ''; ?>>
-        <?php echo htmlspecialchars(localizedWeekdayName($day) . ' ' . $day->format('d.m.Y')); ?>
-    </h2>
-
-
-    <table>
+    <section class="daily-calendar-day weekly-calendar-day">
+        <h2 class="daily-date-heading" <?php echo $isToday ? 'id="today-day"' : ''; ?>>
+            <?php echo htmlspecialchars(localizedWeekdayName($day) . ' ' . $day->format('d.m.Y')); ?>
+        </h2>
+        <div class="daily-schedule-scroll">
+            <table class="daily-schedule">
         <tr>
             <th class="mechanic-th-cell"></th>
             <?php foreach ($slots as $slotTime): ?>
@@ -117,5 +117,7 @@ foreach ($days as $day): ?>
                 ?>
             </tr>
         <?php endforeach; ?>
-    </table>
+            </table>
+        </div>
+    </section>
 <?php endforeach; ?>

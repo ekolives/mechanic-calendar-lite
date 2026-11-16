@@ -28,7 +28,39 @@ if ($smtpResult && $smtpResult->num_rows > 0) {
 }
 
 $hasEncryptedPassword = !empty($smtpData['smtp_password']);
+
+$calendarView = $_GET['view'] ?? 'weekly';
+if (!in_array($calendarView, ['daily', 'weekly'], true)) {
+    $calendarView = 'weekly';
+}
+
+$calendarDate = date('Y-m-d');
+if (isset($_GET['date']) && is_string($_GET['date'])) {
+    $parsedCalendarDate = DateTime::createFromFormat('!Y-m-d', $_GET['date']);
+    if ($parsedCalendarDate && $parsedCalendarDate->format('Y-m-d') === $_GET['date']) {
+        $calendarDate = $_GET['date'];
+    }
+}
 ?>
+
+<section class="calendar-settings-switch">
+    <div>
+        <h2>Widok kalendarza</h2>
+        <p>Wybierz widok i wróć do kalendarza.</p>
+    </div>
+    <div class="calendar-settings-options">
+        <a href="../table/index.php?view=daily&amp;date=<?php echo rawurlencode($calendarDate); ?>"
+            class="calendar-settings-option<?php echo $calendarView === 'daily' ? ' is-active' : ''; ?>"
+            <?php echo $calendarView === 'daily' ? 'aria-current="page"' : ''; ?>>
+            📅 <?php echo htmlspecialchars($lang_daily_view, ENT_QUOTES, 'UTF-8'); ?>
+        </a>
+        <a href="../table/index.php?view=weekly&amp;date=<?php echo rawurlencode($calendarDate); ?>"
+            class="calendar-settings-option<?php echo $calendarView === 'weekly' ? ' is-active' : ''; ?>"
+            <?php echo $calendarView === 'weekly' ? 'aria-current="page"' : ''; ?>>
+            <?php echo htmlspecialchars($lang_weekly_view, ENT_QUOTES, 'UTF-8'); ?> 📅
+        </a>
+    </div>
+</section>
 
 <table>
     <tr>

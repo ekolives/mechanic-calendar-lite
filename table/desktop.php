@@ -241,84 +241,81 @@ $stmt->close();
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../newstyle.css?v=1.0" />
+    <link rel="stylesheet" href="../newstyle.css?v=<?php echo filemtime(__DIR__ . '/../newstyle.css'); ?>" />
 </head>
 
 <body>
 
-    <div id="header">
-        <?php require_once "../sys-backend/lang.php"; ?>
-        <div id="logo">
+    <div id="header" class="calendar-header">
+        <div class="calendar-toolbar">
+            <div class="calendar-toolbar-row calendar-toolbar-primary">
+                <h3 class="desktop-toolbar-title"><?php
+                    ob_start();
+                    require_once "../sys-backend/lang.php";
+                    $languageControls = ob_get_clean();
+                    echo '<span class="brand-name">' . htmlspecialchars($lang_WebTitle, ENT_QUOTES, 'UTF-8') . '</span>'
+                        . '<span class="brand-user">' . htmlspecialchars($userName, ENT_QUOTES, 'UTF-8') . '</span>';
+                ?></h3>
 
-            <form method="get" style="display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; align-items: center; white-space: nowrap;">
-                <input type="hidden" name="view" value="<?php echo htmlspecialchars($view); ?>">
-                <input type="hidden" name="date" value="<?php echo htmlspecialchars($dateInput); ?>">
-                <td><label> </label> </td>
+                <form method="get" class="desktop-calendar-nav">
+                    <input type="hidden" name="view" value="<?php echo htmlspecialchars($view, ENT_QUOTES, 'UTF-8'); ?>">
+                    <input type="hidden" name="date" value="<?php echo htmlspecialchars($dateInput, ENT_QUOTES, 'UTF-8'); ?>">
+                    <?php if ($view === 'weekly'): ?>
+                        <button type="submit" name="week" value="prev" class="button-green">← <?php echo htmlspecialchars($lang_prev_week, ENT_QUOTES, 'UTF-8'); ?></button>
+                        <button type="submit" name="week" value="today" class="button-green"><?php echo htmlspecialchars($lang_this_week, ENT_QUOTES, 'UTF-8'); ?></button>
+                        <button type="submit" name="week" value="next" class="button-green"><?php echo htmlspecialchars($lang_next_week, ENT_QUOTES, 'UTF-8'); ?> →</button>
+                    <?php else: ?>
+                        <button type="submit" name="day" value="prev" class="button-green">← <?php echo htmlspecialchars($lang_prev_day, ENT_QUOTES, 'UTF-8'); ?></button>
+                        <button type="submit" name="day" value="today" class="button-green"><?php echo htmlspecialchars($lang_today, ENT_QUOTES, 'UTF-8'); ?></button>
+                        <button type="submit" name="day" value="next" class="button-green"><?php echo htmlspecialchars($lang_next_day, ENT_QUOTES, 'UTF-8'); ?> →</button>
+                    <?php endif; ?>
+                </form>
 
-                <?php
-                if ($view == 'weekly') {
+                <form method="get" class="calendar-date-form">
+                    <input type="hidden" name="view" value="<?php echo htmlspecialchars($view, ENT_QUOTES, 'UTF-8'); ?>">
+                    <input class="calendar-date-input" id="calendarDate" type="date" name="date"
+                        title="<?php echo htmlspecialchars($lang_date, ENT_QUOTES, 'UTF-8'); ?>"
+                        aria-label="<?php echo htmlspecialchars($lang_date, ENT_QUOTES, 'UTF-8'); ?>"
+                        value="<?php echo htmlspecialchars($dateInput, ENT_QUOTES, 'UTF-8'); ?>"
+                        onchange="if (this.value) this.form.submit();">
+                    <noscript><button type="submit" class="calendar-date-submit"><?php echo htmlspecialchars($lang_show, ENT_QUOTES, 'UTF-8'); ?></button></noscript>
+                </form>
 
-                    echo '<button type="submit" name="week" value="prev" style="display: inline-block; flex: 0 0 auto;" class="button-green">← ' . $lang_prev_week . '</button>';
-                    echo '<button type="submit" name="week" value="today" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_this_week . '</button>';
-                    echo '<button type="submit" name="week" value="next" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_next_week . ' →</button>';
-                } else {
-                    echo '<button type="submit" name="day" value="prev" style="display: inline-block; flex: 0 0 auto;" class="button-green">← ' . $lang_prev_day . '</button>';
-                    echo '<button type="submit" name="day" value="today" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_today . '</button>';
-                    echo '<button type="submit" name="day" value="next" style="display: inline-block; flex: 0 0 auto;" class="button-green">' . $lang_next_day . ' →</button>';
-                }
-                echo "<h3>$lang_WebTitle - $userName</h3>";
+                <div class="desktop-toolbar-actions">
+                    <a href="reservation_list.php"
+                        class="toolbar-icon-link"
+                        title="<?php echo htmlspecialchars($lang_reservation_list, ENT_QUOTES, 'UTF-8'); ?>"
+                        aria-label="<?php echo htmlspecialchars($lang_reservation_list, ENT_QUOTES, 'UTF-8'); ?>">
+                        <img src="../sys-backend/clipboard-list.svg" alt="">
+                    </a>
+                    <a href="../settings/index.php?tab=5&amp;view=<?php echo rawurlencode($view); ?>&amp;date=<?php echo rawurlencode($dateInput); ?>"
+                        class="toolbar-icon-link"
+                        title="<?php echo htmlspecialchars($lang_settings, ENT_QUOTES, 'UTF-8'); ?>"
+                        aria-label="<?php echo htmlspecialchars($lang_settings, ENT_QUOTES, 'UTF-8'); ?>">
+                        <img src="../sys-backend/settings.svg" alt="">
+                    </a>
+                    <?php
+                    // opcjonalny link do zewnętrznej strony, pobierany z bazy danych
+                    $sql = "SELECT * FROM `settings` where `setting_name` = 'external_link' and status = 1";
+                    $result = $conn->query($sql);
+                    if ($result->num_rows > 0) {
+                        $row = $result->fetch_assoc();
+                        $externalLink = $row['setting_values'];
+                        $linkName = $row['setting_locale'];
+                        echo '<a href="' . htmlspecialchars($externalLink, ENT_QUOTES, 'UTF-8') . '" target="_blank" rel="noopener noreferrer" class="button desktop-toolbar-external-link">' . htmlspecialchars($linkName, ENT_QUOTES, 'UTF-8') . '</a>';
+                    }
+                    ?>
+                </div>
 
-
-                // link z obrazkiem ../sys_backend/clipboard-list.svg 
-                echo '<a href="reservation_list.php"
-         style="margin-left: auto; display: inline-flex; align-items: center;"
-         title="' . htmlspecialchars($lang_reservation_list, ENT_QUOTES, 'UTF-8') . '"
-         aria-label="' . htmlspecialchars($lang_reservation_list, ENT_QUOTES, 'UTF-8') . '">
-         <img src="../sys-backend/clipboard-list.svg" style="width: 32px; height: 32px;"></a>';
-
-
-                // link z obrazkiem ../sys_backend/settings.svg 
-                echo '<a href="../settings/index.php"
-         style="margin-left: auto; display: inline-flex; align-items: center;"
-         title="' . htmlspecialchars($lang_settings, ENT_QUOTES, 'UTF-8') . '"
-         aria-label="' . htmlspecialchars($lang_settings, ENT_QUOTES, 'UTF-8') . '">
-         <img src="../sys-backend/settings.svg" style="width: 32px; height: 32px;"></a>';
-
-
-                // opcjonalny link do zewnętrznej strony, pobierany z bazy danych
-                $sql = "SELECT * FROM `settings` where `setting_name` = 'external_link' and status = 1";
-                $result = $conn->query($sql);
-                if ($result->num_rows > 0) {
-                    $row = $result->fetch_assoc();
-                    $externalLink = $row['setting_values'];
-                    $linkName = $row['setting_locale'];
-                    echo '<a href="' . htmlspecialchars($externalLink) . '" style="margin-left: auto; display: inline-flex; align-items: center" target="_blank" class="button" >' . htmlspecialchars($linkName) . '</a>';
-                }
-                ?>
-            </form>
+                <div class="calendar-header-tools">
+                    <?php echo $languageControls; ?>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="wrapper">
         <div id="content">
-            <table>
-                <tr>
-                    <td>
-                        <form method="get">
-                            <input type="hidden" name="view" value="<?php echo htmlspecialchars($view); ?>">
-                    <td><label><?php echo $lang_date; ?>:</label></td>
-                    <td><input type="date" name="date" value="<?php echo htmlspecialchars($dateInput); ?>"> </td>
-                    <td><button type="submit"><?php echo $lang_show; ?></button> </td>
-                    </form>
-
-                    <td><a href="index.php?view=daily" style="margin-left: auto;" class="button-orange">📅 <?php echo $lang_daily_view; ?></a></td>
-                    <td><a href="index.php?view=weekly" style="margin-left: auto;" class="button-orange"><?php echo $lang_weekly_view; ?> 📅</a>
-
-                </tr>
-            </table>
-
-
-
             <?php if (!empty($errorMessage)): ?>
                 <div id="reservationError" class="error-message"><?php echo htmlspecialchars($errorMessage); ?></div>
             <?php endif; ?>
