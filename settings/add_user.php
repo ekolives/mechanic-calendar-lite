@@ -2,83 +2,55 @@
 require_once __DIR__ . '/../sys-backend/session_config.php';
 require_once __DIR__ . '/../sys-backend/db_connect.php';
 
-
 if ($user_system_permissions != 1) {
     require_once __DIR__ . '/no_access.php';
     exit;
 }
+
+$pageTitle = 'Dodaj użytkownika';
+$backTab = '2';
+include __DIR__ . '/_header.php';
 ?>
+<form method="post" action="backend/insert_user.php" class="settings-form">
+    <?php echo csrf_field(); ?>
 
+    <div class="settings-grid">
+        <div class="settings-field">
+            <label for="user_login">Login</label>
+            <input id="user_login" type="text" name="user_login" required autofocus autocomplete="off">
+        </div>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
+        <div class="settings-field">
+            <label for="user_password">Hasło</label>
+            <input id="user_password" type="password" name="user_password" required autocomplete="new-password">
+        </div>
 
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../newstyle.css?v=<?php echo filemtime(__DIR__ . '/../newstyle.css'); ?>" />
-    <title>Kalendarz</title>
+        <div class="settings-field settings-field-wide">
+            <label for="user_email">Email</label>
+            <input id="user_email" type="email" name="user_email" autocomplete="off">
+        </div>
 
-</head>
+        <div class="settings-field">
+            <label for="permissions">Uprawnienie</label>
+            <select id="permissions" name="permissions">
+                <option value="1">Administrator</option>
+                <option value="2" selected>Użytkownik</option>
+                <option value="3">Współpracownik</option>
+            </select>
+        </div>
 
-<body>
-
-    <div id="header">
-        <?php include "../sys-backend/lang.php"; ?>
-        <div id="logo">
-            <h3>Kalendarz</h3>
+        <div class="settings-field">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="0">Nieaktywny</option>
+                <option value="1" selected>Aktywny</option>
+            </select>
         </div>
     </div>
 
-    <div id="wrapper">
-        <div id="content">
-            <h1>Dodaj użytkownika</h1>
-    
-<table>
-    <form method="post" action="backend/insert_user.php">
-<tr>
-<td><label>Login:</label></td><td>
-<input type="text" name="user_login" value="">
-</td>
-</tr>
-
-<tr>
-<td><label>Hasło:</label></td><td>
-<input type="password" name="user_password" >
-</td>
-</tr>
-
-<tr>
-<td><label>Email:</label></td><td>
-<input type="email" name="user_email" value="">
-</td>
-</tr>
-
-
-<tr>
-<td><label>Uprawnienie:</label></td><td>
-        <select name="permissions">
-            <option value="1">Administrator</option>
-            <option value="2">Użytkownik</option>
-            <option value="3">Współpracownik</option>
-        </select></td>
-</tr>
-
-
-<tr>
-    <td><label>Status:</label></td>
-    <td>
-        <select name="status">
-            <option value="0">Nieaktywny</option>
-            <option value="1">Aktywny</option>
-        </select>
-    </td>
-</tr>
-
-<tr>
-    <td><a href="index.php" class="button">Powrót</a></td>
-<td><input type="submit" value="Zapisz" class="button-orange"></td>
-
-</tr>
-</table>
+    <div class="settings-form-actions settings-form-actions-split">
+        <a href="index.php?tab=2" class="settings-btn">Powrót</a>
+        <button type="submit" class="settings-btn settings-btn-primary">Zapisz</button>
+    </div>
 </form>
+<?php include __DIR__ . '/_footer.php'; ?>

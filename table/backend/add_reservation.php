@@ -35,7 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->close();
         }
 
-        if ($mechanicId > 0 && $mechanic && $slotDate && $slotStart && $slotEnd) {
+        if ($mechanicId > 0 && !user_can_access_mechanic($conn, $userId, $mechanicId)) {
+            $_SESSION['reservation_error'] = 'Nie masz uprawnień do rezerwacji u tego mechanika.';
+        } elseif ($slotDate !== '' && !is_valid_date($slotDate)) {
+            $_SESSION['reservation_error'] = 'Nieprawidłowa data rezerwacji.';
+        } elseif ($mechanicId > 0 && $mechanic && $slotDate && $slotStart && $slotEnd) {
             $workStart = DateTime::createFromFormat('H:i:s', $mechanic['work_start_time'] ?? '08:00:00') ?: DateTime::createFromFormat('H:i', substr($mechanic['work_start_time'] ?? '08:00:00', 0, 5));
             $workEnd = DateTime::createFromFormat('H:i:s', $mechanic['work_end_time'] ?? '16:00:00') ?: DateTime::createFromFormat('H:i', substr($mechanic['work_end_time'] ?? '16:00:00', 0, 5));
             $slotStartTime = DateTime::createFromFormat('H:i', $slotStart);
@@ -171,6 +175,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 //echo "<br>Error Message: " . ($_SESSION['reservation_error'] ?? 'No errors');
-header('Location: ' . $_SERVER['HTTP_REFERER']);
-exit;
+safe_referer_redirect('../index.php');
 ?>

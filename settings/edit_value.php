@@ -7,65 +7,58 @@ if ($user_system_permissions != 1) {
     exit;
 }
 
-$translationId = $_GET['id'] ?? null;
-if (!$translationId) {
-    die("Nie podano ID tłumaczenia.");
+$settingId = (int) ($_GET['id'] ?? 0);
+if (!$settingId) {
+    die("Nie podano ID ustawienia.");
 }
 
 $stmt = $conn->prepare("SELECT * FROM settings WHERE sys_id = ?");
-$stmt->bind_param("i", $translationId);
+$stmt->bind_param("i", $settingId);
 $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows === 0) {
-    die("Nie znaleziono tłumaczenia o podanym ID.");
+    die("Nie znaleziono ustawienia o podanym ID.");
 }
-$translation = $result->fetch_assoc();
+$setting = $result->fetch_assoc();
 $result->free();
 $stmt->close();
+
+$pageTitle = 'Edytuj zmienną';
+$backTab = '5';
+include __DIR__ . '/_header.php';
 ?>
+<form action="backend/update_value.php" method="post" class="settings-form">
+    <?php echo csrf_field(); ?>
+    <input type="hidden" name="id" value="<?php echo (int) $setting['sys_id']; ?>">
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
+    <div class="settings-grid">
+        <div class="settings-field">
+            <label for="setting_name">Nazwa</label>
+            <input type="text" name="setting_name" id="setting_name" value="<?php echo $h($setting['setting_name']); ?>" readonly>
+        </div>
 
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../newstyle.css?v=<?php echo filemtime(__DIR__ . '/../newstyle.css'); ?>" />
-    <title>Kalendarz</title>
+        <div class="settings-field">
+            <label for="setting_sort">Sortowanie</label>
+            <input type="text" name="setting_sort" id="setting_sort" value="<?php echo $h($setting['setting_sort']); ?>">
+        </div>
 
-</head>
+        <div class="settings-field settings-field-wide">
+            <label for="setting_values">Wartość</label>
+            <input type="text" name="setting_values" id="setting_values" value="<?php echo $h($setting['setting_values']); ?>" autofocus>
+        </div>
 
-<body>
-
-    <div id="header">
-        <?php include "../sys-backend/lang.php"; ?>
-        <div id="logo">
-            <h3>Kalendarz</h3>
+        <div class="settings-field">
+            <label for="setting_status">Status</label>
+            <select name="setting_status" id="setting_status">
+                <option value="0" <?php echo (int) $setting['status'] === 0 ? 'selected' : ''; ?>>Nieaktywny</option>
+                <option value="1" <?php echo (int) $setting['status'] === 1 ? 'selected' : ''; ?>>Aktywny</option>
+            </select>
         </div>
     </div>
 
-    <div id="wrapper">
-        <div id="content">
-            <h1>Edytuj Zmienną</h1>
-            <form action="backend/update_value.php" method="post">
-                <input type="hidden" name="id" value="<?php echo $translation['sys_id']; ?>">
-                 <label for="setting_sort">Sortowanie:</label>
-                <input type="text" name="setting_sort" id="setting_sort" value="<?php echo $translation['setting_sort']; ?>">
-
-                <label for="setting_name">Nazwa:</label>
-                <input type="text" name="setting_name" id="setting_name" value="<?php echo $translation['setting_name']; ?>" readonly>
-
-                <label for="setting_values">Wartość:</label>
-                <input type="text" name="setting_values" id="setting_values" value="<?php echo $translation['setting_values']; ?>">
-
-                <label for="setting_status">Status:</label>
-                <select name="setting_status" id="setting_status">
-                    <option value="0" <?php echo $translation['status'] == 0 ? 'selected' : ''; ?>>Nieaktywny</option>
-                    <option value="1" <?php echo $translation['status'] == 1 ? 'selected' : ''; ?>>Aktywny</option>
-                </select>
-
-
-                <input type="submit" value="Zapisz">
-            </form>
-        </div>
+    <div class="settings-form-actions settings-form-actions-split">
+        <a href="index.php?tab=5" class="settings-btn">Powrót</a>
+        <button type="submit" class="settings-btn settings-btn-primary">Zapisz</button>
     </div>
+</form>
+<?php include __DIR__ . '/_footer.php'; ?>

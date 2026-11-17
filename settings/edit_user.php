@@ -7,7 +7,7 @@ if ($user_system_permissions != 1) {
     exit;
 }
 
-$workerId = $_GET['id'] ?? null;
+$workerId = (int) ($_GET['id'] ?? 0);
 if (!$workerId) {
     die("Nie podano ID pracownika.");
 }
@@ -18,138 +18,95 @@ $result = $stmt->get_result();
 if ($result->num_rows === 0) {
     die("Nie znaleziono pracownika o podanym ID.");
 }
-
-
 $worker = $result->fetch_assoc();
 $result->free();
 $stmt->close();
+
+// uprawnienia użytkownika do mechaników: mechanic_id => notification
+$userPerms = [];
+$stmt = $conn->prepare("SELECT mechanic_id, notification FROM permissions WHERE user_id = ?");
+$stmt->bind_param("i", $workerId);
+$stmt->execute();
+$permResult = $stmt->get_result();
+while ($p = $permResult->fetch_assoc()) {
+    $userPerms[(int) $p['mechanic_id']] = !empty($p['notification']);
+}
+$stmt->close();
+
+$mechanicsResult = $conn->query("SELECT mechanic_id, mechanic_name FROM mechanics ORDER BY mechanic_sort ASC, mechanic_name ASC");
+
+$pageTitle = 'Edytuj użytkownika';
+$backTab = '2';
+include __DIR__ . '/_header.php';
+
+$perm = (int) $worker['user_permissions'];
 ?>
+<form method="post" action="backend/update_user.php" class="settings-form">
+    <?php echo csrf_field(); ?>
+    <input type="hidden" name="id" value="<?php echo $h($worker['user_id']); ?>">
 
+    <div class="settings-grid">
+        <div class="settings-field">
+            <label for="user_login">Login</label>
+            <input id="user_login" type="text" name="user_login" value="<?php echo $h($worker['user_login']); ?>" required autocomplete="off">
+        </div>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
+        <div class="settings-field">
+            <label for="user_password">Hasło</label>
+            <input id="user_password" type="password" name="user_password" autocomplete="new-password" placeholder="Pozostaw puste, aby nie zmieniać">
+        </div>
 
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../newstyle.css?v=<?php echo filemtime(__DIR__ . '/../newstyle.css'); ?>" />
-    <title>Kalendarz</title>
+        <div class="settings-field settings-field-wide">
+            <label for="user_email">Email</label>
+            <input id="user_email" type="email" name="user_email" value="<?php echo $h($worker['user_email']); ?>" autocomplete="off">
+        </div>
 
-</head>
+        <div class="settings-field">
+            <label for="permissions">Typ</label>
+            <select id="permissions" name="permissions">
+                <option value="1" <?php echo $perm === 1 ? 'selected' : ''; ?>>Administrator</option>
+                <option value="2" <?php echo $perm === 2 ? 'selected' : ''; ?>>Użytkownik</option>
+                <option value="3" <?php echo $perm === 3 ? 'selected' : ''; ?>>Współpracownik</option>
+            </select>
+        </div>
 
-<body>
+        <div class="settings-field">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="0" <?php echo !$worker['user_status'] ? 'selected' : ''; ?>>Nieaktywny</option>
+                <option value="1" <?php echo $worker['user_status'] ? 'selected' : ''; ?>>Aktywny</option>
+            </select>
+        </div>
 
-    <div id="header">
-        <?php include "../sys-backend/lang.php"; ?>
-        <div id="logo">
-            <h3>Kalendarz</h3>
+        <div class="settings-field settings-field-wide">
+            <label>Uprawnienia do</label>
+            <div class="settings-check-list">
+                <?php if ($mechanicsResult): ?>
+                    <?php while ($mechanic = $mechanicsResult->fetch_assoc()): ?>
+                        <?php
+                        $mid = (int) $mechanic['mechanic_id'];
+                        $hasAccess = array_key_exists($mid, $userPerms);
+                        $notify = $hasAccess && $userPerms[$mid];
+                        ?>
+                        <div class="settings-check-row">
+                            <label class="settings-check">
+                                <input type="checkbox" name="mechanics[]" value="<?php echo $mid; ?>" <?php echo $hasAccess ? 'checked' : ''; ?>>
+                                <span><?php echo $h($mechanic['mechanic_name']); ?></span>
+                            </label>
+                            <label class="settings-check settings-check-muted">
+                                <input type="checkbox" name="notifications[]" value="<?php echo $mid; ?>" <?php echo $notify ? 'checked' : ''; ?>>
+                                <span>wysyłaj powiadomienie</span>
+                            </label>
+                        </div>
+                    <?php endwhile; ?>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 
-    <div id="wrapper">
-        <div id="content">
-            <h1>Edytuj użytkownika</h1>
-
-            <table>
-                <form method="post" action="backend/update_user.php">
-                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($worker['user_id']); ?>">
-                    <tr>
-                        <td><label>Login:</label></td>
-                        <td>
-                            <input type="text" name="user_login" value="<?php echo htmlspecialchars($worker['user_login']); ?>">
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td><label>Hasło:</label></td>
-                        <td>
-                            <input type="password" name="user_password">
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td><label>Email:</label></td>
-                        <td>
-                            <input type="email" name="user_email" value="<?php echo $worker['user_email']; ?>">
-                        </td>
-                    </tr>
-
-
-                    <tr>
-                        <td><label>Typ:</label></td>
-                        <td>
-                            <select name="permissions">
-                                <option value="1" <?php echo $worker['user_permissions'] ? 'selected' : ''; ?>>Administrator</option>
-                                <option value="2" <?php echo $worker['user_permissions'] === 2 ? 'selected' : ''; ?>>Użytkownik</option>
-                                <option value="3" <?php echo $worker['user_permissions'] === 3 ? 'selected' : ''; ?>>Współpracownik</option>
-                            </select>
-                        </td>
-                    </tr>
-
-
-                    <tr>
-                        <td><label>Uprawnienia do:</label></td>
-                        <td>
-                            <div class="mechanics-list">
-                                <?php
-                                $stmt = $conn->prepare("SELECT mechanic_id, mechanic_name FROM mechanics");
-                                $stmt->execute();
-                                $mechanics = $stmt->get_result();
-                                $stmt->close();
-
-                                while ($mechanic = $mechanics->fetch_assoc()) {
-
-                                    $mechanicid = $mechanic['mechanic_id'];
-                                    $mechanic_name = $mechanic['mechanic_name'];
-
-                                    $stmt = $conn->prepare("
-                    SELECT *
-                    FROM permissions
-                    WHERE user_id = ? AND mechanic_id = ?
-                ");
-                                    $stmt->bind_param("ii", $workerId, $mechanicid);
-                                    $stmt->execute();
-                                    $result = $stmt->get_result();
-                                    $permRow = $result->fetch_assoc();
-                                    $stmt->close();
-
-                                    $checked = $permRow ? 'checked' : '';
-                                    $notifyChecked = !empty($permRow['notification']) ? 'checked' : '';
-
-                                    echo '
-                <div class="mechanic-item" style="display: flex; align-items: center; justify-content: space-between; gap: 20px; max-width: 420px;">
-                    <label style="margin-bottom: 0; cursor: pointer;">
-                        <input type="checkbox" name="mechanics[]" value="' . $mechanicid . '" ' . $checked . '>
-                        ' . htmlspecialchars($mechanic_name) . '
-                    </label>
-                    <label style="margin-bottom: 0; cursor: pointer;">
-                        <input type="checkbox" name="notifications[]" value="' . $mechanicid . '" ' . $notifyChecked . '>
-                        wysyłaj powiadomienie
-                    </label>
-                </div>';
-                                }
-
-                                $mechanics->free();
-                                ?>
-                            </div>
-                        </td>
-                    </tr>
-
-
-                    <tr>
-                        <td><label>Status:</label></td>
-                        <td>
-                            <select name="status">
-                                <option value="0" <?php echo !$worker['user_status'] ? 'selected' : ''; ?>>Nieaktywny</option>
-                                <option value="1" <?php echo $worker['user_status'] ? 'selected' : ''; ?>>Aktywny</option>
-                            </select>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td><a href="index.php" class="button">Powrót</a></td>
-                        <td><input type="submit" value="Zapisz" class="button-orange"></td>
-
-                    </tr>
-            </table>
-            </form>
+    <div class="settings-form-actions settings-form-actions-split">
+        <a href="index.php?tab=2" class="settings-btn">Powrót</a>
+        <button type="submit" class="settings-btn settings-btn-primary">Zapisz</button>
+    </div>
+</form>
+<?php include __DIR__ . '/_footer.php'; ?>

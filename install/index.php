@@ -1,133 +1,158 @@
 <?php
-// Sprawdzenie czy system jest już zainstalowany
-$isInstalled = false;
-$installationMessage = '';
-/** @var string $servername */
-/** @var string $username */
-/** @var string $password */
-/** @var string $dbname */
+/**
+ * Instalator aplikacji (jednorazowy).
+ *
+ * Zabezpieczenia:
+ *  - jeśli sys-backend/config.php istnieje, instalator jest zablokowany (niezależnie od stanu bazy),
+ *  - config.php jest tworzony atomowo (tryb "x"), więc dwa równoległe żądania nie nadpiszą się,
+ *  - wartości trafiają do config.php przez var_export(), więc nie da się wstrzyknąć kodu PHP,
+ *  - hasło administratora ustawia osoba instalująca (brak domyślnego admin/admin),
+ *  - klucz szyfrowania SMTP jest generowany losowo.
+ *
+ * Po instalacji najlepiej usunąć cały katalog install/ z serwera.
+ */
 
-if (file_exists('../sys-backend/config.php')) {
-    try {
-        include '../sys-backend/config.php';
+$configPath = __DIR__ . '/../sys-backend/config.php';
+$locked = file_exists($configPath);
 
-        // Połączenie z bazą (@ tłumi warning PHP przy błędach sieciowych/DNS, obsługiwane niżej)
-        $checkConn = @new mysqli($servername, $username, $password, $dbname);
+$h = static fn($v): string => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
 
-        if ($checkConn->connect_error) {
-            $installationMessage = "⚠️ Nie udało się połączyć z bazą. Spróbuj zainstalować ponownie.";
-        } else {
-            // Sprawdzenie czy tabela users istnieje i ma rekordy
-            $result = $checkConn->query("SELECT COUNT(*) as count FROM users");
-
-            if ($result) {
-                $row = $result->fetch_assoc();
-                if ($row['count'] > 0) {
-                    $isInstalled = true;
-                    $installationMessage = "✅ System jest już zainstalowany!";
-                }
-            }
-
-            $checkConn->close();
-        }
-    } catch (Exception $e) {
-        // config.php istnieje ale coś poszło nie tak
-        $installationMessage = "⚠️ Błąd podczas sprawdzenia: " . $e->getMessage();
-    }
+/** Zawartość config.php z bezpiecznie zapisanymi wartościami. */
+function build_config_php(string $host, string $user, string $pass, string $db, string $smtpKey): string
+{
+    return "<?php\n"
+        . '$servername = ' . var_export($host, true) . ";\n"
+        . '$username = ' . var_export($user, true) . ";\n"
+        . '$password = ' . var_export($pass, true) . ";\n"
+        . '$dbname = ' . var_export($db, true) . ";\n"
+        . "define('SMTP_ENCRYPTION_KEY', " . var_export($smtpKey, true) . ");\n";
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Sprawdzenie ochronne - jeśli system już istnieje, nie pozwalaj na reinstalację
-    if ($isInstalled) {
-        echo "<p style='color: red; font-weight: bold;'>❌ BŁĄD: System jest już zainstalowany! Nie można dokonać reinstalacji.</p>";
-        echo "<p>Jeśli chcesz zainstalować od nowa, usuń bazę danych i spróbuj ponownie.</p>";
-        exit;
+$errors = [];
+$done = false;
+
+if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $dbHost = trim((string)($_POST['db_host'] ?? ''));
+    $dbUser = (string)($_POST['db_user'] ?? '');
+    $dbPass = (string)($_POST['db_pass'] ?? '');
+    $dbName = trim((string)($_POST['db_name'] ?? ''));
+    $adminPass = (string)($_POST['admin_pass'] ?? '');
+    $adminPass2 = (string)($_POST['admin_pass2'] ?? '');
+
+    if (!preg_match('/^[A-Za-z0-9._-]{1,255}$/', $dbHost)) {
+        $errors[] = 'Nieprawidłowy host bazy danych.';
+    }
+    if ($dbUser === '' || strlen($dbUser) > 128) {
+        $errors[] = 'Podaj użytkownika bazy danych.';
+    }
+    // nazwa bazy trafia do zapytania w backtickach - dopuszczamy tylko bezpieczne znaki
+    if (!preg_match('/^[A-Za-z0-9_]{1,64}$/', $dbName)) {
+        $errors[] = 'Nazwa bazy może zawierać tylko litery, cyfry i znak _ (maks. 64 znaki).';
+    }
+    if (strlen($adminPass) < 8) {
+        $errors[] = 'Hasło administratora musi mieć co najmniej 8 znaków.';
+    } elseif ($adminPass !== $adminPass2) {
+        $errors[] = 'Hasła administratora nie są takie same.';
+    }
+    if (!is_writable(dirname($configPath))) {
+        $errors[] = 'Brak uprawnień zapisu do katalogu sys-backend/ - nie można utworzyć config.php.';
+    }
+    $structureSQL = @file_get_contents(__DIR__ . '/structure.sql');
+    if ($structureSQL === false) {
+        $errors[] = 'Nie znaleziono pliku structure.sql.';
     }
 
-    $dbHost = $_POST['db_host'];
-    $dbUser = $_POST['db_user'];
-    $dbPass = $_POST['db_pass'];
-    $dbName = $_POST['db_name'];
+    if (!$errors) {
+        try {
+            $pdo = new PDO("mysql:host=$dbHost;charset=utf8mb4", $dbUser, $dbPass, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            ]);
+            $pdo->exec("CREATE DATABASE IF NOT EXISTS `$dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci");
+            $pdo->exec("USE `$dbName`");
+            $pdo->exec($structureSQL);
+            unset($pdo);
 
-    try {
-        $pdo = new PDO("mysql:host=$dbHost", $dbUser, $dbPass);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            // osobne połączenie - po wieloinstrukcyjnym exec() poprzednie mogłoby mieć niezwolnione wyniki
+            $pdo2 = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4", $dbUser, $dbPass, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            ]);
+            $stmt = $pdo2->prepare("UPDATE users SET user_password = ?, sys_updatedate = NOW() WHERE user_login = 'admin'");
+            $stmt->execute([password_hash($adminPass, PASSWORD_DEFAULT)]);
 
-        $pdo->exec("CREATE DATABASE IF NOT EXISTS `$dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci");
-        $pdo->exec("USE `$dbName`");
+            // config.php na końcu; tryb "x" = tylko jeśli plik jeszcze nie istnieje (atomowo)
+            $fh = @fopen($configPath, 'x');
+            if ($fh === false) {
+                throw new RuntimeException('Nie udało się utworzyć config.php (plik już istnieje lub brak uprawnień).');
+            }
+            fwrite($fh, build_config_php($dbHost, $dbUser, $dbPass, $dbName, bin2hex(random_bytes(32))));
+            fclose($fh);
+            @chmod($configPath, 0640);
 
-        $structureSQL = file_get_contents('structure.sql');
-        $pdo->exec($structureSQL);
-
-        $configContent = "<?php\n"
-            . "\$servername = \"$dbHost\";\n"
-            . "\$username = \"$dbUser\";\n"
-            . "\$password = \"$dbPass\";\n"
-            . "\$dbname = \"$dbName\";\n"
-            . "?>";
-
-        file_put_contents('../sys-backend/config.php', $configContent);
-
-
-
-        echo "<p style='color:green'>✅ Instalacja zakończona pomyślnie.</p>";
-        echo "<p style='color:black'>Pierwsze logowanie: login: <b>admin</b>, hasło: <b>admin</b>.</p>";
-        echo "<p style='color:black'>Zachwile zostaniesz przeniesiony do strony głównej.</p>";
-        echo "<script>setTimeout(function(){ window.location.href = '../index.php'; }, 8000);</script>";
-    } catch (PDOException $e) {
-        echo "<p style='color:red'>❌ Błąd: " . $e->getMessage() . "</p>";
+            $done = true;
+        } catch (Throwable $e) {
+            $errors[] = 'Błąd instalacji: ' . $e->getMessage();
+        }
     }
-
-    exit;
 }
 ?>
-
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" W>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
+<!DOCTYPE html>
+<html lang="pl">
 
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instalacja</title>
     <link rel="stylesheet" href="../newstyle.css?v=<?php echo filemtime(__DIR__ . '/../newstyle.css'); ?>" />
-
 </head>
 
-<body>
-    <div id="wrapper">
-        <div id="content">
-            <section class="container">
-                <h1>Install</h1>
-
-                <?php
-                if ($isInstalled) {
-                    // System już zainstalowany
-                    echo "<div style='background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; padding: 15px; margin: 20px 0; color: #155724;'>";
-                    echo "<h2>🔒 System Już Zainstalowany</h2>";
-                    echo "<p>Baza danych zawiera już dane - system został wcześniej zainstalowany.</p>";
-                    echo "<p>Jeśli chcesz ponownie zainstalować system, usuń najpierw bazę danych:</p>";
-                    echo "<pre style='background: #f8f9fa; padding: 10px; border-radius: 4px;'>DROP DATABASE db_moto;</pre>";
-                    echo "<p style='margin-top: 15px;'><a href='../index.php' style='text-decoration: none; color: #155724; font-weight: bold;'>← Wróć do logowania</a></p>";
-                    echo "</div>";
-                } else {
-                    // Formularz instalacji
-                    if (!empty($installationMessage)) {
-                        echo "<p style='color: #ff9800; background: #fff3cd; padding: 10px; border-radius: 4px; border: 1px solid #ffc107; margin-bottom: 20px;'>" . htmlspecialchars($installationMessage) . "</p>";
-                    }
-                ?>
-                    <form method="post">
-                        <label>Host bazy danych: <input type="text" name="db_host" value="localhost" required></label><br><br>
-                        <label>Użytkownik bazy: <input type="text" name="db_user" value="root" required></label><br><br>
-                        <label>Hasło bazy: <input type="password" name="db_pass" required></label><br><br>
-                        <label>Nazwa bazy: <input type="text" name="db_name" value="db_moto" required></label><br><br>
-                        <input type="submit" value="Zainstaluj">
-                    </form>
-                <?php
-                }
-                ?>
-            </section>
+<body class="login-page">
+    <main class="login-card">
+        <div class="login-brand">
+            <span class="login-brand-dot"></span>
+            <span class="login-brand-name">Kalendarz mechanika</span>
         </div>
-    </div>
+        <h1>Instalacja</h1>
+
+        <?php if ($done): ?>
+            <div class="settings-alert settings-alert-success" role="status">Instalacja zakończona pomyślnie.</div>
+            <p>Zaloguj się jako <b>admin</b> hasłem, które właśnie ustawiłeś(-aś).</p>
+            <p><b>Ze względów bezpieczeństwa usuń teraz katalog <code>install/</code> z serwera.</b></p>
+            <p><a href="../index.php" class="login-submit" style="display:inline-block; text-decoration:none;">Przejdź do logowania</a></p>
+
+        <?php elseif ($locked): ?>
+            <div class="settings-alert settings-alert-success" role="status">🔒 System jest już zainstalowany.</div>
+            <p>Instalator jest zablokowany, bo istnieje plik <code>sys-backend/config.php</code>.</p>
+            <p>Aby zainstalować od nowa, usuń ten plik ręcznie na serwerze (oraz starą bazę danych).</p>
+            <p><a href="../index.php">← Wróć do logowania</a></p>
+
+        <?php else: ?>
+            <?php foreach ($errors as $err): ?>
+                <div class="login-error" role="alert"><?php echo $h($err); ?></div>
+            <?php endforeach; ?>
+
+            <form method="post" class="login-form" autocomplete="off">
+                <label for="db_host">Host bazy danych</label>
+                <input id="db_host" type="text" name="db_host" value="<?php echo $h($_POST['db_host'] ?? 'localhost'); ?>" required>
+
+                <label for="db_user">Użytkownik bazy</label>
+                <input id="db_user" type="text" name="db_user" value="<?php echo $h($_POST['db_user'] ?? 'root'); ?>" required>
+
+                <label for="db_pass">Hasło bazy</label>
+                <input id="db_pass" type="password" name="db_pass" autocomplete="new-password">
+
+                <label for="db_name">Nazwa bazy</label>
+                <input id="db_name" type="text" name="db_name" value="<?php echo $h($_POST['db_name'] ?? 'db_moto'); ?>" required>
+
+                <label for="admin_pass">Hasło administratora (min. 8 znaków)</label>
+                <input id="admin_pass" type="password" name="admin_pass" minlength="8" autocomplete="new-password" required>
+
+                <label for="admin_pass2">Powtórz hasło administratora</label>
+                <input id="admin_pass2" type="password" name="admin_pass2" minlength="8" autocomplete="new-password" required>
+
+                <button type="submit" class="login-submit">Zainstaluj</button>
+            </form>
+        <?php endif; ?>
+    </main>
 </body>
 
 </html>

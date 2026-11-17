@@ -1343,3 +1343,938 @@ select:focus {
   border-color: #4caf50;
   box-shadow: 0 0 4px rgba(76, 175, 80, 0.2);
 }
+
+/* ===== Strona logowania ===== */
+body.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #1e3a8a 130%);
+  background-attachment: fixed;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+  padding: 32px 30px 24px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(2, 6, 23, .45), 0 0 0 1px rgba(255, 255, 255, .06);
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.login-brand-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, .25);
+}
+
+.login-card h1 {
+  margin: 18px 0 22px;
+  font-size: 24px;
+  color: #0f172a;
+}
+
+.login-error {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.login-form label {
+  margin: 0 0 6px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"] {
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 11px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 16px;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+
+.login-form input[type="text"]:focus,
+.login-form input[type="password"]:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .2);
+}
+
+.login-submit {
+  margin-top: 6px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, .35);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .1s, box-shadow .15s, filter .15s;
+}
+
+.login-submit:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 16px rgba(14, 165, 233, .45);
+}
+
+.login-submit:active {
+  transform: translateY(1px);
+}
+
+.login-card .credits {
+  margin: 20px 0 0;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+/* przełącznik języka w rogu, ikona wylogowania zbędna na logowaniu */
+.login-lang {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+}
+
+.login-lang .header-logout-control {
+  display: none;
+}
+
+.login-lang .header-language-form > div {
+  display: flex;
+  gap: 0;
+  padding: 3px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .1);
+}
+
+.login-lang .header-language-form input[type="submit"] {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.login-lang .header-language-form input[type="submit"]:hover {
+  background: rgba(255, 255, 255, .18);
+}
+
+
+/* ===== Strona ustawień (zakładka Ustawienia) ===== */
+.settings-page {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.settings-page .calendar-settings-switch p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  text-align: left;
+}
+
+.settings-card {
+  margin: 0 0 22px;
+  padding: 18px;
+  border: 1px solid #dbe3ec;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, .06);
+}
+
+.settings-card-head {
+  margin: 0 0 14px;
+  padding-left: 12px;
+  border-left: 4px solid #2563eb;
+}
+
+.settings-card-head h2 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 18px;
+  text-align: left;
+}
+
+.settings-card-head p {
+  margin: 3px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  text-align: left;
+}
+
+/* tabela ustawień */
+.settings-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.settings-table {
+  margin: 0;
+  width: 100%;
+  border: none;
+  border-collapse: collapse;
+}
+
+.settings-table th {
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #0f172a, #1e3a8a);
+  color: #e2e8f0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.settings-table td {
+  padding: 10px 14px;
+  border-top: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 14px;
+}
+
+.settings-table tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+.settings-table tr:hover td {
+  background: #eff6ff;
+}
+
+.settings-table .settings-actions {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* przyciski */
+.settings-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 7px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, box-shadow .15s;
+}
+
+.settings-btn:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.settings-btn-primary {
+  border: none;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  box-shadow: 0 3px 10px rgba(14, 165, 233, .35);
+  color: #fff;
+}
+
+.settings-btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: #fff;
+  filter: brightness(1.08);
+}
+
+/* komunikaty */
+.settings-alert {
+  margin: 0 0 16px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.settings-alert-success {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.settings-alert-error {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+/* formularz SMTP */
+.settings-form {
+  display: block;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.settings-field-wide {
+  grid-column: 1 / -1;
+}
+
+.settings-field label {
+  margin: 0 0 6px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.settings-field input[type="text"],
+.settings-field input[type="password"],
+.settings-field input[type="email"],
+.settings-field input[type="number"],
+.settings-field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #f8fafc;
+  box-shadow: none;
+  color: #0f172a;
+  font-family: inherit;
+  font-size: 15px;
+  box-sizing: border-box;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+
+.settings-field input:hover,
+.settings-field select:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.settings-field input:focus,
+.settings-field select:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .2);
+}
+
+.settings-hint {
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.settings-hint-ok {
+  color: #15803d;
+}
+
+.settings-test {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.settings-test .settings-field {
+  flex: 1 1 260px;
+}
+
+.settings-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+@media (max-width: 700px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-form-actions .settings-btn,
+  .settings-test .settings-btn {
+    width: 100%;
+  }
+}
+
+
+/* ===== Ustawienia: podstrony, listy, plakietki ===== */
+.settings-page-narrow {
+  max-width: 720px;
+}
+
+.settings-card-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-btn-danger {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.settings-btn-danger:hover {
+  border-color: #dc2626;
+  background: #dc2626;
+  color: #fff;
+}
+
+.settings-form-actions-split {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-form-actions-group {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-field input[type="color"] {
+  width: 100%;
+  height: 42px;
+  padding: 3px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #f8fafc;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.settings-field input[type="time"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: inherit;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.settings-field input[type="time"]:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .2);
+}
+
+.settings-field input[readonly] {
+  background: #eef2f7;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+/* próbka koloru mechanika */
+.settings-swatch {
+  display: inline-block;
+  min-width: 64px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .15);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* plakietki statusu */
+.settings-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.settings-badge-ok     { background: #dcfce7; color: #166534; }
+.settings-badge-off    { background: #fee2e2; color: #991b1b; }
+.settings-badge-admin  { background: #dbeafe; color: #1d4ed8; }
+.settings-badge-info   { background: #e0f2fe; color: #0369a1; }
+.settings-badge-muted  { background: #e2e8f0; color: #475569; }
+
+.settings-code {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 13px;
+}
+
+/* lista uprawnień do mechaników */
+.settings-check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.settings-check-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+}
+
+.settings-field .settings-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settings-field .settings-check-muted {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.settings-check input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+/* pomoc */
+.settings-help {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: help;
+}
+
+.settings-help li {
+  position: relative;
+  margin: 0 0 10px;
+  padding: 12px 14px 12px 52px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.5;
+  counter-increment: help;
+}
+
+.settings-help li::before {
+  content: counter(help);
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 26px;
+  height: 26px;
+  margin-top: -13px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 26px;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .settings-form-actions-split {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .settings-form-actions-split .settings-btn,
+  .settings-form-actions-group {
+    width: 100%;
+  }
+
+  .settings-form-actions-group .settings-btn {
+    flex: 1;
+  }
+}
+
+
+/* ===== Okna rezerwacji (nowa / edycja) - odświeżony wygląd =====
+   Układ, kolejność pól i rozmiary pozostają jak wcześniej; zmieniają się
+   kolory, zaokrąglenia i skalowanie do wielkości ekranu. */
+.modal-backdrop {
+  background: rgba(15, 23, 42, .55);
+  overflow-y: auto;              /* niski ekran (laptop 14"): całe okno można przewinąć */
+  overscroll-behavior: contain;
+}
+
+.modal {
+  /* 14" laptop: ~520px jak dotąd, duży monitor: rośnie do 640px */
+  width: calc(100% - 24px);
+  max-width: clamp(520px, 36vw, 640px);
+  margin: clamp(12px, 4vh, 50px) auto;
+  padding: clamp(16px, 1.6vw, 26px);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(2, 6, 23, .4), 0 0 0 1px rgba(15, 23, 42, .06);
+  box-sizing: border-box;
+  font-size: clamp(14px, .9vw, 16px);
+}
+
+/* pasek akcentowy u góry jak w kalendarzu */
+.modal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  border-radius: 14px 14px 0 0;
+  background: linear-gradient(90deg, #2563eb, #0ea5e9);
+}
+
+.modal h2 {
+  margin: 4px 36px 14px 0;
+  padding-left: 12px;
+  border-left: 4px solid #2563eb;
+  color: #1e293b;
+  font-size: clamp(18px, 1.2vw, 22px);
+  line-height: 1.25;
+}
+
+.modal label {
+  margin-bottom: 11px;
+  color: #334155;
+  font-weight: 700;
+  font-size: .92em;
+}
+
+.modal input[type="text"],
+.modal input[type="date"],
+.modal input[type="time"],
+.modal select,
+.modal textarea {
+  width: 100%;
+  margin-top: 4px;
+  padding: 9px 11px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: inherit;
+  font-size: 1.05em;
+  font-weight: 400;
+  box-sizing: border-box;
+  box-shadow: none;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+
+.modal textarea {
+  border: 1px solid #cbd5e1;   /* było grube czerwone obramowanie */
+  resize: vertical;
+  min-height: 70px;
+}
+
+.modal input:hover,
+.modal select:hover,
+.modal textarea:hover {
+  border-color: #94a3b8;
+}
+
+.modal input:focus,
+.modal select:focus,
+.modal textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .2);
+}
+
+/* pola w jednej linii (telefon, VIN, rejestracja): etykieta + pole */
+.modal .inline-label {
+  gap: 10px;
+}
+
+.modal .inline-label input {
+  margin-top: 0;
+}
+
+/* wiersze z dwoma polami - zawijają się dopiero gdy brakuje miejsca */
+.edit-time-row label,
+.edit-meta-row>div {
+  min-width: 160px;
+}
+
+/* przyciski w oknie */
+.modal button {
+  border-radius: 9px;
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal .button-green {
+  border: none;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  box-shadow: 0 3px 10px rgba(14, 165, 233, .35);
+  color: #fff;
+  padding: 10px 18px;
+}
+
+.modal .button-green:hover {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  filter: brightness(1.08);
+}
+
+/* przycisk Usuń ma kolor w atrybucie style - zachowujemy go, poprawiamy tylko kształt */
+.modal #deleteBtn {
+  border: none;
+  box-shadow: 0 3px 10px rgba(220, 38, 38, .3);
+  color: #fff;
+  padding: 10px 18px;
+}
+
+.modal #deleteBtn:hover {
+  filter: brightness(1.1);
+}
+
+.modal .modal-close {
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 22px;
+  line-height: 1;
+  transition: background .15s, color .15s;
+}
+
+.modal .modal-close:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* informacje systemowe (kto i kiedy utworzył) - jasne zamiast ciemnoszarego */
+.modal .sys-box {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #475569;
+  box-shadow: none;
+  text-align: left;
+}
+
+.modal .sys-box small {
+  font-size: .85em;
+}
+
+/* komunikat zamiast przycisków dla zablokowanych rezerwacji */
+.modal #editDisabledMessage {
+  border-radius: 9px;
+  text-align: center;
+}
+
+/* niski ekran (np. laptop 14", 768px wysokości): ciaśniejsze odstępy */
+@media (max-height: 800px) {
+  .modal label {
+    margin-bottom: 7px;
+  }
+
+  .modal input[type="text"],
+  .modal input[type="date"],
+  .modal input[type="time"],
+  .modal select,
+  .modal textarea {
+    padding: 7px 10px;
+  }
+
+  .modal textarea {
+    min-height: 56px;
+  }
+}
+
+/* duży monitor (27", 1440p i więcej): okno nieco większe i czytelniejsze */
+@media (min-width: 1900px) {
+  .modal {
+    max-width: 680px;
+  }
+}
+
+/* wąskie okno przeglądarki */
+@media (max-width: 560px) {
+  .modal {
+    margin: 8px auto;
+    padding: 14px;
+  }
+
+  .edit-time-row label,
+  .edit-meta-row>div {
+    min-width: 130px;
+  }
+}
+
+
+/* Okno rezerwacji ponad paskiem kalendarza (z-index 1000) i stopką (1001),
+   inaczej pasek zasłaniał górę okna. Komunikaty (9999) nadal są wyżej. */
+.modal-backdrop {
+  z-index: 1100;
+}
+
+
+/* ===== Szczegóły rezerwacji (table/reservation_details.php) ===== */
+.settings-page.details-page {
+  max-width: clamp(900px, 70vw, 1200px);   /* laptop 14": ~900px, monitor 27": do 1200px */
+}
+
+.details-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  align-items: start;
+}
+
+.details-col {
+  align-content: start;
+}
+
+.details-radios {
+  display: flex;
+  gap: 18px;
+  margin-top: 8px;
+}
+
+.details-comment {
+  margin-top: 16px;
+}
+
+.settings-field textarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;     /* zamiast grubego bordowego obramowania */
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: inherit;
+  font-size: 15px;
+  box-sizing: border-box;
+  resize: vertical;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+
+.settings-field textarea:hover {
+  border-color: #94a3b8;
+}
+
+.settings-field textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .2);
+}
+
+.settings-field input[type="date"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: inherit;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.settings-field input[type="date"]:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .2);
+}
+
+.details-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 28px;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.details-meta strong {
+  color: #334155;
+}
+
+@media (max-width: 800px) {
+  .details-columns {
+    grid-template-columns: 1fr;
+  }
+}

@@ -8,7 +8,8 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 /**
- * Szyfruje hasło SMTP za pomocą AES-256-CBC i klucza SMTP_ENCRYPTION_KEY.
+ * Szyfruje hasło SMTP algorytmem AES-256-GCM (szyfrowanie z uwierzytelnieniem) kluczem SMTP_ENCRYPTION_KEY.
+ * Format: "v2:" + base64(iv[12] . tag[16] . szyfrogram).
  */
 function encryptSmtpPassword(string $plainPassword): string
 {
@@ -16,35 +17,55 @@ function encryptSmtpPassword(string $plainPassword): string
         return '';
     }
     $key = hash('sha256', SMTP_ENCRYPTION_KEY, true);
-    $ivLength = openssl_cipher_iv_length('AES-256-CBC');
-    $iv = openssl_random_pseudo_bytes($ivLength);
-    $encrypted = openssl_encrypt($plainPassword, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+    $iv = random_bytes(12);
+    $tag = '';
+    $encrypted = openssl_encrypt($plainPassword, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag, '', 16);
+    if ($encrypted === false) {
+        return '';
+    }
 
-    return base64_encode($iv . $encrypted);
+    return 'v2:' . base64_encode($iv . $tag . $encrypted);
 }
 
 /**
  * Odszyfrowuje hasło SMTP zapisane w bazie danych.
+ * Obsługuje nowy format (v2, GCM) oraz stary (AES-256-CBC bez prefiksu) - stare hasła nadal działają
+ * i zostaną zapisane w nowym formacie przy najbliższej zmianie ustawień SMTP.
  */
-function decryptSmtpPassword(string $encryptedBase64): string
+function decryptSmtpPassword(string $encrypted): string
 {
-    if ($encryptedBase64 === '' || !defined('SMTP_ENCRYPTION_KEY')) {
-        return '';
-    }
-    $data = base64_decode($encryptedBase64, true);
-    if ($data === false) {
+    if ($encrypted === '' || !defined('SMTP_ENCRYPTION_KEY')) {
         return '';
     }
     $key = hash('sha256', SMTP_ENCRYPTION_KEY, true);
+
+    if (strncmp($encrypted, 'v2:', 3) === 0) {
+        $data = base64_decode(substr($encrypted, 3), true);
+        if ($data === false || strlen($data) <= 28) {
+            return '';
+        }
+        $iv = substr($data, 0, 12);
+        $tag = substr($data, 12, 16);
+        $cipher = substr($data, 28);
+        $plain = openssl_decrypt($cipher, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+
+        return $plain !== false ? $plain : '';
+    }
+
+    // format dawny: AES-256-CBC
+    $data = base64_decode($encrypted, true);
+    if ($data === false) {
+        return '';
+    }
     $ivLength = openssl_cipher_iv_length('AES-256-CBC');
     if (strlen($data) <= $ivLength) {
         return '';
     }
     $iv = substr($data, 0, $ivLength);
-    $encrypted = substr($data, $ivLength);
-    $decrypted = openssl_decrypt($encrypted, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+    $cipher = substr($data, $ivLength);
+    $plain = openssl_decrypt($cipher, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
 
-    return $decrypted !== false ? $decrypted : '';
+    return $plain !== false ? $plain : '';
 }
 
 /**

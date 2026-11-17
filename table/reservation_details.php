@@ -3,6 +3,7 @@ require_once __DIR__ . '/../sys-backend/session_config.php';
 require_once __DIR__ . '/../sys-backend/db_connect.php';
 
 /** @var mysqli $conn */
+/** @var string $userName */
 
 if (!isset($_GET['slot_id'])) {
     die("Brak ID rezerwacji");
@@ -14,258 +15,223 @@ $stmt = $conn->prepare("SELECT * FROM calendar_slots WHERE slot_id = ?");
 $stmt->bind_param("i", $reservationId);
 $stmt->execute();
 $slot = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 
-if (!$slot) {
+if (!$slot || !user_can_access_mechanic($conn, $userId, $slot['mechanic_id'])) {
+    // ten sam komunikat dla "brak" i "brak dostępu" - nie ujawniamy, czy rezerwacja istnieje
+    http_response_code(404);
     die("Nie znaleziono rezerwacji");
 }
 
+$h = static fn($v): string => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+
 $reservationNumber = 'REQ' . str_pad($slot['slot_id'], 7, '0', STR_PAD_LEFT);
 
+// kto utworzył / zmienił rezerwację
+$userLogin = static function (mysqli $conn, $id): string {
+    $stmt = $conn->prepare("SELECT user_login FROM users WHERE user_id = ?");
+    $id = (int)$id;
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    return $row['user_login'] ?? '-';
+};
+$submiterName = $userLogin($conn, $slot['sys_submiter']);
+$updaterName = $userLogin($conn, $slot['sys_updatedby']);
 
+$mechStmt = $conn->prepare("SELECT m.mechanic_id, m.mechanic_name FROM mechanics m
+    INNER JOIN permissions p ON p.mechanic_id = m.mechanic_id AND p.user_id = ? AND p.status = 1
+    GROUP BY m.mechanic_id, m.mechanic_name ORDER BY m.mechanic_name");
+$mechStmt->bind_param('i', $userId);
+$mechStmt->execute();
+$mechanicsResult = $mechStmt->get_result();
+
+ob_start();
+include __DIR__ . '/../sys-backend/lang.php';
+$languageControls = ob_get_clean();
+
+$receipt = (int)($slot['receipt_or_invoice'] ?? 0);
+$state = (int)$slot['reservation_state'];
 ?>
 <!DOCTYPE html>
 <html lang="pl">
 
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="../newstyle.css?v=<?php echo filemtime(__DIR__ . '/../newstyle.css'); ?>" />
+    <title><?php echo $h($reservationNumber); ?> - Edycja rezerwacji</title>
 </head>
 
 <body>
 
-    <div id="header">
-        <?php include "../sys-backend/lang.php"; ?>
-        <div id="logo">
-            <h3>Edycja rezerwacji</h3>
+    <div id="header" class="calendar-header">
+        <div class="calendar-toolbar">
+            <div class="calendar-toolbar-row calendar-toolbar-primary">
+                <h3 class="desktop-toolbar-title">
+                    <span class="brand-name"><?php echo $h($lang_WebTitle ?? 'Kalendarz'); ?></span>
+                    <span class="brand-user"><?php echo $h($userName); ?></span>
+                </h3>
+
+                <div class="desktop-toolbar-actions">
+                    <a href="reservation_list.php" class="button desktop-toolbar-external-link">← Lista rezerwacji</a>
+                    <a href="index.php" class="button desktop-toolbar-external-link">Kalendarz</a>
+                </div>
+
+                <div class="calendar-header-tools">
+                    <?php echo $languageControls; ?>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="wrapper">
         <div id="content">
+            <div class="settings-page details-page">
 
-            <?php if (!empty($_SESSION['reservation_error'])): ?>
-                <div style="color:red; font-weight:bold;">
-                    <?php
-                    echo $_SESSION['reservation_error'];
-                    unset($_SESSION['reservation_error']);
-                    ?>
-                </div>
-            <?php endif; ?>
+                <?php if (!empty($_SESSION['reservation_error'])): ?>
+                    <div class="settings-alert settings-alert-error" role="alert">
+                        <?php
+                        echo $h($_SESSION['reservation_error']);
+                        unset($_SESSION['reservation_error']);
+                        ?>
+                    </div>
+                <?php endif; ?>
 
-            <?php if (!empty($_SESSION['reservation_success'])): ?>
-                <div style="color:green; font-weight:bold;">
-                    <?php
-                    echo $_SESSION['reservation_success'];
-                    unset($_SESSION['reservation_success']);
-                    ?>
-                </div>
-            <?php endif; ?>
+                <?php if (!empty($_SESSION['reservation_success'])): ?>
+                    <div class="settings-alert settings-alert-success" role="status">
+                        <?php
+                        echo $h($_SESSION['reservation_success']);
+                        unset($_SESSION['reservation_success']);
+                        ?>
+                    </div>
+                <?php endif; ?>
 
+                <form method="post" action="backend/update_reservation.php" class="settings-form">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="reservation[slot_id]" value="<?php echo (int)$slot['slot_id']; ?>">
 
+                    <section class="settings-card">
+                        <div class="settings-card-head">
+                            <h2>Edycja rezerwacji <?php echo $h($reservationNumber); ?></h2>
+                        </div>
 
+                        <div class="details-columns">
+                            <!-- lewa kolumna: termin -->
+                            <div class="settings-grid details-col">
+                                <div class="settings-field settings-field-wide">
+                                    <label for="slot_number">Numer rezerwacji</label>
+                                    <input id="slot_number" type="text" name="reservation[slot_number]" value="<?php echo $h($reservationNumber); ?>" readonly>
+                                </div>
 
-            <form method="post" action="backend/update_reservation.php">
+                                <div class="settings-field settings-field-wide">
+                                    <label for="slot_date">Data</label>
+                                    <input id="slot_date" type="date" name="reservation[slot_date]" value="<?php echo $h($slot['slot_date']); ?>" required>
+                                </div>
 
-                <input type="hidden" name="reservation[slot_id]" value="<?php echo $slot['slot_id']; ?>">
+                                <div class="settings-field">
+                                    <label for="slot_start">Godzina start</label>
+                                    <input id="slot_start" type="time" name="reservation[slot_start]" value="<?php echo $h(substr($slot['slot_time_start'], 0, 5)); ?>" required>
+                                </div>
 
-                <div style="display:flex; gap:20px;">
-                    <div style="flex:1;">
-                        <table>
+                                <div class="settings-field">
+                                    <label for="slot_end">Godzina koniec</label>
+                                    <input id="slot_end" type="time" name="reservation[slot_time_end]" value="<?php echo $h(substr($slot['slot_time_end'], 0, 5)); ?>" required>
+                                </div>
 
-                            <tr>
-                                <th>Numer rezerwacji</th>
-                                <td>
-                                    <input type="text" name="reservation[slot_number]" value="<?php echo $reservationNumber; ?>" readonly>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Data</th>
-                                <td>
-                                    <input type="date" name="reservation[slot_date]"
-                                        value="<?php echo $slot['slot_date']; ?>" required>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Godzina start</th>
-                                <td>
-                                    <input type="time" name="reservation[slot_start]"
-                                        value="<?php echo substr($slot['slot_time_start'], 0, 5); ?>" required>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Godzina koniec</th>
-                                <td>
-                                    <input type="time" name="reservation[slot_time_end]"
-                                        value="<?php echo substr($slot['slot_time_end'], 0, 5); ?>" required>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Mechanik</th>
-                                <td>
-                                    <select name="reservation[mechanic_id]" required>
+                                <div class="settings-field settings-field-wide">
+                                    <label for="mechanic_id">Mechanik</label>
+                                    <select id="mechanic_id" name="reservation[mechanic_id]" required>
                                         <option value="">-- wybierz mechanika --</option>
-
-                                        <?php
-                                        $mechStmt = $conn->query("SELECT mechanic_id, mechanic_name FROM mechanics ORDER BY mechanic_name");
-                                        while ($m = $mechStmt->fetch_assoc()) {
-                                            $sel = ($m['mechanic_id'] == $slot['mechanic_id']) ? 'selected' : '';
-                                            echo "<option value='{$m['mechanic_id']}' $sel>{$m['mechanic_name']}</option>";
-                                        }
-                                        ?>
+                                        <?php if ($mechanicsResult): ?>
+                                            <?php while ($m = $mechanicsResult->fetch_assoc()): ?>
+                                                <option value="<?php echo (int)$m['mechanic_id']; ?>" <?php echo ((int)$m['mechanic_id'] === (int)$slot['mechanic_id']) ? 'selected' : ''; ?>>
+                                                    <?php echo $h($m['mechanic_name']); ?>
+                                                </option>
+                                            <?php endwhile; ?>
+                                        <?php endif; ?>
                                     </select>
-                                </td>
-                            </tr>
+                                </div>
 
-                            <tr>
-                                <th>NIP</th>
-                                <td>
-                                    <input type="text" name="reservation[nip]"
-                                        value="<?php echo $slot['nip']; ?>">
-                                    <label>
-                                        <input type="radio" name="reservation[receipt_or_invoice]" value="0"
-                                            <?php if ((int)($slot['receipt_or_invoice'] ?? 0) === 0) echo 'checked'; ?>>
-                                        Paragon
-                                    </label>
-                                    <label>
-                                        <input type="radio" name="reservation[receipt_or_invoice]" value="1"
-                                            <?php if ((int)($slot['receipt_or_invoice'] ?? 0) === 1) echo 'checked'; ?>>
-                                        Faktura
-                                    </label>
-                                </td>
-                            </tr>
+                                <div class="settings-field settings-field-wide">
+                                    <label for="nip">NIP</label>
+                                    <input id="nip" type="text" name="reservation[nip]" value="<?php echo $h($slot['nip'] ?? ''); ?>">
+                                    <div class="details-radios">
+                                        <label class="settings-check">
+                                            <input type="radio" name="reservation[receipt_or_invoice]" value="0" <?php echo $receipt === 0 ? 'checked' : ''; ?>>
+                                            <span>Paragon</span>
+                                        </label>
+                                        <label class="settings-check">
+                                            <input type="radio" name="reservation[receipt_or_invoice]" value="1" <?php echo $receipt === 1 ? 'checked' : ''; ?>>
+                                            <span>Faktura</span>
+                                        </label>
+                                    </div>
+                                </div>
 
-
-                            <tr>
-                                <th>Status</th>
-                                <td>
-                                    <select name="reservation[state]">
-                                        <option value="0" <?php if ($slot['reservation_state'] == 0) echo 'selected'; ?>>Aktywna</option>
-                                        <option value="1" <?php if ($slot['reservation_state'] == 1) echo 'selected'; ?>>Anulowana</option>
-                                        <option value="2" <?php if ($slot['reservation_state'] == 2) echo 'selected'; ?>>Zakończona</option>
+                                <div class="settings-field settings-field-wide">
+                                    <label for="state">Status</label>
+                                    <select id="state" name="reservation[state]">
+                                        <option value="0" <?php echo $state === 0 ? 'selected' : ''; ?>>Aktywna</option>
+                                        <option value="1" <?php echo $state === 1 ? 'selected' : ''; ?>>Anulowana</option>
+                                        <option value="2" <?php echo $state === 2 ? 'selected' : ''; ?>>Zakończona</option>
                                     </select>
-                                </td>
-                            </tr>
+                                </div>
+                            </div>
 
-                        </table>
-                    </div>
+                            <!-- prawa kolumna: opis i dane pojazdu -->
+                            <div class="settings-grid details-col">
+                                <div class="settings-field settings-field-wide">
+                                    <label for="title">Tytuł</label>
+                                    <input id="title" type="text" name="reservation[title]" value="<?php echo $h($slot['reservation_title']); ?>">
+                                </div>
 
-                    <div style="flex:1;">
-                        <table>
+                                <div class="settings-field settings-field-wide">
+                                    <label for="description">Opis</label>
+                                    <textarea id="description" name="reservation[reservation_description]" rows="5"><?php echo $h($slot['reservation_description']); ?></textarea>
+                                </div>
 
-                            <tr>
-                                <th>Tytuł</th>
-                                <td>
-                                    <input type="text" name="reservation[title]"
-                                        value="<?php echo $slot['reservation_title']; ?>" style="width: 100%;">
-                                </td>
-                            </tr>
+                                <div class="settings-field settings-field-wide">
+                                    <label for="phone">Telefon</label>
+                                    <input id="phone" type="text" name="reservation[phone]" value="<?php echo $h($slot['reservation_phone']); ?>">
+                                </div>
 
-                            <tr>
-                                <th>Opis</th>
-                                <td>
-                                    <textarea name="reservation[reservation_description]" rows="5"><?php echo $slot['reservation_description']; ?></textarea>
-                                </td>
-                            </tr>
+                                <div class="settings-field settings-field-wide">
+                                    <label for="vin">VIN</label>
+                                    <input id="vin" type="text" name="reservation[vin]" value="<?php echo $h($slot['reservation_vin']); ?>" maxlength="17">
+                                </div>
 
-                            <tr>
-                                <th>Telefon</th>
-                                <td>
-                                    <input type="text" name="reservation[phone]"
-                                        value="<?php echo $slot['reservation_phone']; ?>">
-                                </td>
-                            </tr>
+                                <div class="settings-field">
+                                    <label for="plate">Rejestracja</label>
+                                    <input id="plate" type="text" name="reservation[plate]" value="<?php echo $h($slot['reservation_plate']); ?>">
+                                </div>
 
-                            <tr>
-                                <th>VIN</th>
-                                <td>
-                                    <input type="text" name="reservation[vin]"
-                                        value="<?php echo $slot['reservation_vin']; ?>" maxlength="17">
-                                </td>
-                            </tr>
+                                <div class="settings-field">
+                                    <label for="odometer">Przebieg auta</label>
+                                    <input id="odometer" type="text" name="reservation[odometer]" value="<?php echo $h($slot['odometer'] ?? ''); ?>">
+                                </div>
+                            </div>
+                        </div>
 
-                            <tr>
-                                <th>Rejestracja</th>
-                                <td>
-                                    <input type="text" name="reservation[plate]"
-                                        value="<?php echo $slot['reservation_plate']; ?>">
-                                </td>
-                            </tr>
+                        <div class="settings-field details-comment">
+                            <label for="comment">Komentarz mechanika</label>
+                            <textarea id="comment" name="reservation[comment]" rows="3"><?php echo $h($slot['comment'] ?? ''); ?></textarea>
+                        </div>
 
-                                                        <tr>
-                                <th>Przebieg auta</th>
-                                <td>
-                                    <input type="text" name="reservation[odometer]"
-                                        value="<?php echo $slot['odometer']; ?>">
-                                </td>
-                            </tr>
+                        <div class="settings-form-actions settings-form-actions-split">
+                            <a href="reservation_list.php" class="settings-btn">Powrót do listy</a>
+                            <button type="submit" class="settings-btn settings-btn-primary">Zapisz zmiany</button>
+                        </div>
+                    </section>
+                </form>
 
-
-                        </table>
-                    </div>
+                <div class="details-meta">
+                    <div>Utworzono: <strong><?php echo $h($slot['sys_createdate']); ?></strong> przez <strong><?php echo $h($submiterName); ?></strong></div>
+                    <div>Ostatnia aktualizacja: <strong><?php echo $h($slot['sys_updatedate']); ?></strong> przez <strong><?php echo $h($updaterName); ?></strong></div>
                 </div>
 
-                <table>
-                    <tr>
-                        <th style="width: 100px;">Komentarz Mechanika</th>
-                        <td>
-                            <textarea name="reservation[comment]" rows="3"><?php echo $slot['comment']; ?></textarea>
-                        </td>
-                    </tr>
-                </table>
-
-
+            </div>
         </div>
-
-        <table>
-            <tr>
-                <td><a href="reservation_list.php" class="button">Powrót do Listy</a></td>
-                <td><button type="submit" class="button-green">Zapisz zmiany</button></td>
-                <td style="text-align: right;"><a href="index.php" class="button">Powrót do Kalendarza</a>
-                </td>
-            </tr>
-        </table>
-        </form>
-
-        <div class="sys-box">
-             Utworzono: <?php echo $slot['sys_createdate']; ?></small>
-            <?php
-            // get info who created and updated
-            $sys_submiter = $slot['sys_submiter'];
-            $stmt = $conn->prepare("SELECT * 
-                    FROM users 
-                    WHERE user_id = ?");
-            $stmt->bind_param("i", $sys_submiter);
-            $stmt->execute();
-            $submiter = $stmt->get_result();
-            $submiter = $submiter->fetch_assoc();
-            $submiter_name = $submiter['user_login'];
-
-            echo "  przez: $submiter_name</small><br>";
-            ?>
-
-             Ostatnia aktualizacja: <?php echo $slot['sys_updatedate']; ?></small>
-
-
-            <?php
-            // get info who  updated
-            $sys_updater = $slot['sys_updatedby'];
-            $stmt = $conn->prepare("SELECT * 
-                    FROM users 
-                    WHERE user_id = ?");
-            $stmt->bind_param("i", $sys_updater);
-            $stmt->execute();
-            $updater = $stmt->get_result();
-            $updater = $updater->fetch_assoc();
-            $updater_name = $updater['user_login'];
-
-            echo "  przez: $updater_name</small><br>";
-            ?>
-        </div>
-    </div>
     </div>
 
 </body>

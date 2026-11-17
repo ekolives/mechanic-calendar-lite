@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/../sys-backend/config.php';
+require_once __DIR__ . '/security.php';
+require_once __DIR__ . '/config.php';
 
 $docRoot = realpath($_SERVER['DOCUMENT_ROOT'] ?? '');
 $appRoot = realpath(__DIR__ . '/..');
@@ -37,17 +38,18 @@ if (empty($_SESSION["lang"])) {
     $_SESSION["lang"] = $defaultLang;
 }
 $locale = $_SESSION['lang'];
-$sql = "SELECT * FROM `language` WHERE `locale` =  '$locale'";
-$result = $conn->query($sql);
-if ($result->num_rows > 0) {
-
-    while ($r = $result->fetch_assoc()) {
-        $id = $r['id'];
-        $sys = $r['sys'];
-        $locale = $r['locale'];
-        $name = $r['name'];
-        ${$sys} = $name;
+$langStmt = $conn->prepare("SELECT `sys`, `name` FROM `language` WHERE `locale` = ?");
+if ($langStmt) {
+    $langStmt->bind_param('s', $locale);
+    $langStmt->execute();
+    $result = $langStmt->get_result();
+    while ($result && ($r = $result->fetch_assoc())) {
+        // Tylko klucze lang_* - nie pozwalamy nadpisać innych zmiennych aplikacji
+        if (preg_match('/^lang_[A-Za-z0-9_]+$/', $r['sys'])) {
+            ${$r['sys']} = $r['name'];
+        }
     }
+    $langStmt->close();
 }
 
 function localizedWeekdayName(DateTime $date): string

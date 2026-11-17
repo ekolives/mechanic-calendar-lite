@@ -1,0 +1,4 @@
+# Plik ze schematem bazy nie powinien być dostępny przez przeglądarkę
+<Files "structure.sql">
+    Require all denied
+</Files>

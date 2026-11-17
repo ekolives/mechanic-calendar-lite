@@ -1,33 +1,34 @@
-<?php 
+<?php
 require_once __DIR__ . '/../../sys-backend/session_config.php';
 require_once __DIR__ . '/../../sys-backend/db_connect.php';
-// check db_connect.php
+require_admin();
+require_post();
 
-$mechanic_id = null;
-$mechanic_name = null;
-$mechanic_sort = null;
-$color = null;
-$work_start_time = null;
-$work_end_time = null;
+$mechanic_id = (int)($_POST['id'] ?? 0);
+if ($mechanic_id <= 0) {
+    fail_redirect('Nieprawidłowy identyfikator mechanika.', '../index.php?tab=1');
+}
+$back = '../edit_worker.php?id=' . $mechanic_id;
 
+$mechanic_name = trim((string)($_POST['mechanic_name'] ?? ''));
+$mechanic_sort = (int)($_POST['mechanic_sort'] ?? 0);
+$color = (string)($_POST['color'] ?? '');
+$font_color = (string)($_POST['font_color'] ?? '');
+$work_start_raw = (string)($_POST['work_start_time'] ?? '');
+$work_end_raw = (string)($_POST['work_end_time'] ?? '');
 
-if (isset($_POST['id'])) {
-    $mechanic_id = $_POST['id'];
-    $mechanic_name = $_POST['mechanic_name'];
-    $mechanic_sort = $_POST['mechanic_sort'];
-    $color = $_POST['color'];
-    $work_start_time = $_POST['work_start_time'];
-    $work_end_time = $_POST['work_end_time'];
-    $font_color = $_POST['font_color'];
+if ($mechanic_name === '' || mb_strlen($mechanic_name) > 100) {
+    fail_redirect('Nazwa jest wymagana (maks. 100 znaków).', $back);
+}
+if (!is_valid_color($color) || !is_valid_color($font_color)) {
+    fail_redirect('Nieprawidłowy kolor.', $back);
+}
+if (!is_valid_time($work_start_raw) || !is_valid_time($work_end_raw) || substr($work_start_raw, 0, 5) >= substr($work_end_raw, 0, 5)) {
+    fail_redirect('Godzina zakończenia pracy musi być późniejsza niż rozpoczęcia.', $back);
 }
 
-$work_start_time = !empty($_POST['work_start_time'])
-    ? $_POST['work_start_time'] . ':00'
-    : null;
-
-$work_end_time = !empty($_POST['work_end_time'])
-    ? $_POST['work_end_time'] . ':00'
-    : null;
+$work_start_time = substr($work_start_raw, 0, 5) . ':00';
+$work_end_time = substr($work_end_raw, 0, 5) . ':00';
 
 $stmt = $conn->prepare("
     UPDATE mechanics
@@ -51,10 +52,9 @@ $stmt->bind_param(
     $mechanic_id
 );
 if ($stmt->execute()) {
-    header("Location: ../index.php");
+    header("Location: ../index.php?tab=1");
     exit();
-} else {
-    echo "Błąd aktualizacji danych: " . $stmt->error;
 }
+error_log('update_worker: ' . $stmt->error);
 $stmt->close();
-$conn->close();
+fail_redirect('Nie udało się zapisać zmian.', $back);

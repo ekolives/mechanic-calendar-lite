@@ -24,6 +24,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $_SESSION['active_tab'] = '5';
 
+    // --- walidacja ---
+    $smtpError = null;
+    if (!in_array($smtp_enabled, [0, 1], true) || !in_array($smtp_auth, [0, 1], true)) {
+        $smtpError = 'Nieprawidłowa wartość przełącznika.';
+    } elseif (!in_array($smtp_encryption, ['tls', 'ssl', ''], true)) {
+        $smtpError = 'Nieprawidłowy typ szyfrowania.';
+    } elseif ($smtp_port < 1 || $smtp_port > 65535) {
+        $smtpError = 'Port SMTP musi być liczbą od 1 do 65535.';
+    } elseif ($smtp_host === '' || !preg_match('/^[A-Za-z0-9.\-]{1,255}$/', $smtp_host)) {
+        $smtpError = 'Nieprawidłowy host SMTP.';
+    } elseif (!filter_var($from_email, FILTER_VALIDATE_EMAIL)) {
+        $smtpError = 'Nieprawidłowy adres e-mail nadawcy.';
+    } elseif ($reply_to_email !== '' && !filter_var($reply_to_email, FILTER_VALIDATE_EMAIL)) {
+        $smtpError = 'Nieprawidłowy adres Reply-To.';
+    } elseif ($test_email !== '' && !filter_var($test_email, FILTER_VALIDATE_EMAIL)) {
+        $smtpError = 'Nieprawidłowy adres do testu wysyłki.';
+    } elseif (mb_strlen($from_name) > 100 || preg_match('/[
+]/', $from_name)) {
+        $smtpError = 'Nieprawidłowa nazwa nadawcy.';
+    }
+    if ($smtpError !== null) {
+        $_SESSION['smtp_message_error'] = $smtpError;
+        header('Location: ../index.php?tab=5');
+        exit;
+    }
+
     // Sprawdź czy w tabeli smtp_settings istnieje już rekord
     $existing = null;
     $res = @$conn->query("SELECT * FROM smtp_settings ORDER BY id ASC LIMIT 1");
@@ -122,7 +148,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } else {
-        $_SESSION['smtp_message_error'] = 'Błąd zapisu ustawień SMTP: ' . $conn->error;
+        error_log('update_smtp: ' . $conn->error);
+        $_SESSION['smtp_message_error'] = 'Błąd zapisu ustawień SMTP.';
     }
 
     $conn->close();

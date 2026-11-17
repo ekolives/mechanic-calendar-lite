@@ -3,10 +3,6 @@ require_once __DIR__ . '/../../sys-backend/session_config.php';
 require_once __DIR__ . '/../../sys-backend/db_connect.php';
 require_once  __DIR__ . '/../../sys-backend/audit.php';
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 /** @var mysqli $conn */
 /** @var string $userName */
 /** @var string audit_log */
@@ -46,8 +42,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($mechanicRow) {
             $mechanicId = (int)$mechanicRow['mechanic_id'];
 
-            if ($new_mechanic_id <= 0) {
+            if (!user_can_access_mechanic($conn, $userId, $mechanicId)) {
+                $_SESSION['reservation_error'] = 'Nie masz uprawnień do edycji tej rezerwacji.';
+            } elseif ($new_mechanic_id <= 0) {
                 $_SESSION['reservation_error'] = 'Wybierz mechanika.';
+            } elseif (!user_can_access_mechanic($conn, $userId, $new_mechanic_id)) {
+                $_SESSION['reservation_error'] = 'Nie masz uprawnień do przypisania rezerwacji temu mechanikowi.';
+            } elseif (!is_valid_date($dateInput)) {
+                $_SESSION['reservation_error'] = 'Nieprawidłowa data rezerwacji.';
             } else {
                 $mechanicStmt = $conn->prepare('SELECT work_start_time, work_end_time FROM mechanics WHERE mechanic_id = ?');
                 $mechanicStmt->bind_param('i', $new_mechanic_id);
@@ -129,7 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $audit_log_data ="oldMechanicId = $mechanicId, newMechanicId = $new_mechanic_id, slotStart = $slotStart, slotEnd = $slotEnd, title = $title, reservation_description = $reservation_description, phone = $phone, vin = $vin, plate = $plate, state = $state";
                                 audit_log($conn, $userName, 'Modify reservation', 'Slot ID: ' . $slotId . ' + ' . $audit_log_data);
                             } else {
-                                $_SESSION['reservation_error'] = 'Nie udało się zaktualizować rezerwacji: ' . $stmt->error;
+                                error_log('update_reservation: ' . $stmt->error);
+                                $_SESSION['reservation_error'] = 'Nie udało się zaktualizować rezerwacji.';
                             }
                             $stmt->close();
                         }
@@ -150,5 +153,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 // przekaz $errorMessage na stronę przez sesję
-header('Location: ' . $_SERVER['HTTP_REFERER']);
-exit;
+safe_referer_redirect('../index.php');

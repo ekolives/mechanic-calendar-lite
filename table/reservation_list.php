@@ -63,22 +63,26 @@ if (isset($_GET['date_to']) && !empty($_GET['date_to'])) {
                     <label>Slot</label>
 <?php
 // get available slots from SELECT * FROM `mechanics`
-$stmt = $conn->prepare("SELECT mechanic_id, mechanic_name FROM mechanics");
+$permittedIds = permitted_mechanic_ids($conn, $userId);
+$stmt = $conn->prepare("SELECT m.mechanic_id, m.mechanic_name FROM mechanics m
+    INNER JOIN permissions p ON p.mechanic_id = m.mechanic_id AND p.user_id = ? AND p.status = 1
+    GROUP BY m.mechanic_id, m.mechanic_name ORDER BY m.mechanic_name");
+$stmt->bind_param('i', $userId);
 $stmt->execute();
 $mechanics = $stmt->get_result();
 $stmt->close();
 
 // ostatnio wybrany mechanik
-$selectedMechanic = isset($_GET['slot_id']) ? $_GET['slot_id'] : '';
+$selectedMechanic = isset($_GET['slot_id']) ? (string)(int)$_GET['slot_id'] : '';
 
 echo '<select name="slot_id">';
 echo '<option value="">Wszyscy</option>';
 
 while ($mechanic = $mechanics->fetch_assoc()) {
 
-    $isSelected = ($selectedMechanic == $mechanic['mechanic_id']) ? 'selected' : '';
+    $isSelected = ($selectedMechanic === (string)(int)$mechanic['mechanic_id']) ? 'selected' : '';
 
-    echo '<option value="' . $mechanic['mechanic_id'] . '" ' . $isSelected . '>'
+    echo '<option value="' . (int)$mechanic['mechanic_id'] . '" ' . $isSelected . '>'
         . htmlspecialchars((string) $mechanic['mechanic_name'], ENT_QUOTES, 'UTF-8') .
         '</option>';
 }
@@ -89,11 +93,11 @@ echo '</select>';
 
                 <div class="filter-field">
                     <label>Data od</label>
-                    <input type="date" name="date_from" value="<?php echo $date_from->format('Y-m-d'); ?>">
+                    <input type="date" name="date_from" value="<?php echo htmlspecialchars($date_from->format('Y-m-d'), ENT_QUOTES, 'UTF-8'); ?>">
                 </div>
                 <div class="filter-field">
                     <label>Data do</label>
-                    <input type="date" name="date_to" value="<?php echo $date_to->format('Y-m-d'); ?>">
+                    <input type="date" name="date_to" value="<?php echo htmlspecialchars($date_to->format('Y-m-d'), ENT_QUOTES, 'UTF-8'); ?>">
                 </div>
                 <div class="filter-field filter-field-wide">
                     <label>Treść</label>
@@ -139,14 +143,14 @@ echo '</select>';
                     <?php
 
 
-                    $date_from_val = isset($_GET['date_from']) ? trim($_GET['date_from']) : '';
-                    $date_to_val = isset($_GET['date_to']) ? trim($_GET['date_to']) : '';
-                    $reservation_phone = isset($_GET['reservation_phone']) ? trim($_GET['reservation_phone']) : '';
-                    $reservation_vin = isset($_GET['reservation_vin']) ? trim($_GET['reservation_vin']) : '';
-                    $reservation_plate = isset($_GET['reservation_plate']) ? trim($_GET['reservation_plate']) : '';
-                    $reservation_rejected = isset($_GET['reservation_rejected']) ? trim($_GET['reservation_rejected']) : '';
-                    $slot_id = isset($_GET['slot_id']) ? trim($_GET['slot_id']) : '';
-                    $reservation_search = isset($_GET['reservation_search']) ? trim($_GET['reservation_search']) : '';
+                    $date_from_val = (isset($_GET['date_from']) && is_string($_GET['date_from']) && is_valid_date(trim($_GET['date_from']))) ? trim($_GET['date_from']) : '';
+                    $date_to_val = (isset($_GET['date_to']) && is_string($_GET['date_to']) && is_valid_date(trim($_GET['date_to']))) ? trim($_GET['date_to']) : '';
+                    $reservation_phone = (isset($_GET['reservation_phone']) && is_string($_GET['reservation_phone'])) ? trim($_GET['reservation_phone']) : '';
+                    $reservation_vin = (isset($_GET['reservation_vin']) && is_string($_GET['reservation_vin'])) ? trim($_GET['reservation_vin']) : '';
+                    $reservation_plate = (isset($_GET['reservation_plate']) && is_string($_GET['reservation_plate'])) ? trim($_GET['reservation_plate']) : '';
+                    $reservation_rejected = (isset($_GET['reservation_rejected']) && is_string($_GET['reservation_rejected'])) ? trim($_GET['reservation_rejected']) : '';
+                    $slot_id = (isset($_GET['slot_id']) && is_string($_GET['slot_id'])) ? (int)$_GET['slot_id'] : 0;
+                    $reservation_search = (isset($_GET['reservation_search']) && is_string($_GET['reservation_search'])) ? trim($_GET['reservation_search']) : '';
 
                     $conditions = [];
                     if ($date_from_val && $date_to_val) {
@@ -178,8 +182,14 @@ echo '</select>';
                         $conditions[] = "reservation_state = 1";
                     }
 
-                    if ($slot_id !== '') {
-                        $conditions[] = "`calendar_slots`.`mechanic_id` = '$slot_id'";
+                    // tylko rezerwacje mechaników, do których użytkownik ma dostęp
+                    if (empty($permittedIds)) {
+                        $conditions[] = "1 = 0";
+                    } else {
+                        $conditions[] = "`calendar_slots`.`mechanic_id` IN (" . implode(',', array_map('intval', $permittedIds)) . ")";
+                    }
+                    if ($slot_id > 0) {
+                        $conditions[] = "`calendar_slots`.`mechanic_id` = " . (int)$slot_id;
                     }
                     if ($reservation_search !== '') {
                         $search_safe = $conn->real_escape_string($reservation_search);
@@ -235,7 +245,7 @@ echo '</select>';
 
 
                         echo "<tr>
-        <td class='reservation-date-column'><a href='reservation_details.php?slot_id=" . $slot_id . "' class='button'>" . $slot_date . "</a></td>
+        <td class='reservation-date-column'><a href='reservation_details.php?slot_id=" . (int)$slot_id . "' class='button'>" . htmlspecialchars((string)$slot_date, ENT_QUOTES, 'UTF-8') . "</a></td>
         <td>" . htmlspecialchars((string) $mechanic_name) . "</td>
         <td>" . substr((string) $slot_time, 0, 5) . "</td>
         <td>" . substr((string) $slot_end, 0, 5) . "</td>
@@ -265,7 +275,7 @@ echo '</select>';
 
                 // Pierwsza
                 if ($page > 1) {
-                    echo '<a href="' . build_page_link(1, $query_string) . '" class="button">Pierwsza</a> - ';
+                    echo '<a href="' . htmlspecialchars(build_page_link(1, $query_string), ENT_QUOTES, 'UTF-8') . '" class="button">Pierwsza</a> - ';
                 }
 
                 // numery stron
@@ -278,7 +288,7 @@ echo '</select>';
                     if ($i == $page) {
                         echo "<strong>$i</strong> ";
                     } else {
-                        echo '<a href="' . build_page_link($i, $query_string) . '" class="button">' . $i . '</a> ';
+                        echo '<a href="' . htmlspecialchars(build_page_link($i, $query_string), ENT_QUOTES, 'UTF-8') . '" class="button">' . $i . '</a> ';
                     }
                 }
 
@@ -286,7 +296,7 @@ echo '</select>';
 
                 // Ostatnia
                 if ($page < $total_pages) {
-                    echo '- <a href="' . build_page_link($total_pages, $query_string) . '" class="button">Ostatnia</a>';
+                    echo '- <a href="' . htmlspecialchars(build_page_link($total_pages, $query_string), ENT_QUOTES, 'UTF-8') . '" class="button">Ostatnia</a>';
                 }
 
                 echo '</div>';

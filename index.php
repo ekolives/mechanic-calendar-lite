@@ -4,7 +4,9 @@
 //ini_set('display_startup_errors', 1);
 //error_reporting(E_ALL);
 
+require_once __DIR__ . '/sys-backend/security.php';
 if (session_status() === PHP_SESSION_NONE) {
+    secure_session_cookie_params(2 * 24 * 60 * 60);
     session_start();
 }
 
@@ -80,41 +82,57 @@ if (isset($_SESSION['user_id'])) {
 }
 
 // obsługa logowania
-if (isset($_POST['user_login'], $_POST['user_password'])) {
-    $passwordHash = password_hash($_POST['user_password'], PASSWORD_DEFAULT);
+if (isset($_POST['user_login'], $_POST['user_password']) && is_string($_POST['user_login']) && is_string($_POST['user_password'])) {
+    $loginInput = trim($_POST['user_login']);
+    $ip = (string)($_SERVER['REMOTE_ADDR'] ?? '');
+    // jeden komunikat dla złego loginu i złego hasła - nie ujawniamy, które loginy istnieją
+    $genericError = "Nieprawidłowy login lub hasło.";
 
-    if ($stmt = $conn->prepare('SELECT `user_id`, `user_password`, `user_permissions`, `user_status` 
+    if (login_is_throttled($conn, $loginInput, $ip)) {
+        audit_log($conn, $loginInput, 'logowanie', 'throttled|' . $ip);
+        $login_error = "Zbyt wiele nieudanych prób logowania. Spróbuj ponownie za " . LOGIN_WINDOW_MINUTES . " minut.";
+    } elseif ($stmt = $conn->prepare('SELECT `user_id`, `user_login`, `user_password`, `user_permissions`, `user_status`
                                 FROM `users` WHERE user_login = ?')) {
-        $stmt->bind_param('s', $_POST['user_login']);
+        $stmt->bind_param('s', $loginInput);
         $stmt->execute();
         $stmt->store_result();
 
-        if ($stmt->num_rows > 0) {
-            $stmt->bind_result($id, $password, $usertype, $status);
+        // Dla nieistniejącego użytkownika też wykonujemy password_verify, żeby czas odpowiedzi nie zdradzał, czy login istnieje.
+        $dummyHash = '$2y$10$pOLxgcBJFkVHq8/wWKaaFeAm.HyCc2D8TE5WUltaNfKJdJiNjf7Lm';
+        $found = $stmt->num_rows > 0;
+        if ($found) {
+            $stmt->bind_result($id, $dbLogin, $password, $usertype, $status);
             $stmt->fetch();
+        }
+        $passwordOk = password_verify($_POST['user_password'], $found ? $password : $dummyHash) && $found;
 
-            if (password_verify($_POST['user_password'], $password)) {
-                if ($status == 0) {
-                    audit_log($conn, $_POST['user_login'], 'logowanie', 'account_blocked');
-                    $login_error = "Konto jest zablokowane.";
-                } else {
-                    session_regenerate_id(true);
-                    $_SESSION['user_id'] = $id;
-                    $_SESSION['name'] = $_POST['user_login'];
-                    $_SESSION['user_permissions'] = $usertype;
-                    $_SESSION['logged_in'] = true;
-
-                    audit_log($conn, $_POST['user_login'], 'logowanie', 'success');
-                    header("Location: table/");
-                    exit;
-                }
-            } else {
-                audit_log($conn, $_POST['user_login'], 'logowanie', 'invalid_password');
-                $login_error = "Błędne hasło";
-            }
+        if (!$passwordOk) {
+            audit_log($conn, $loginInput, 'logowanie', ($found ? 'invalid_password|' : 'invalid_user|') . $ip);
+            $login_error = $genericError;
+        } elseif ((int)$status === 0) {
+            audit_log($conn, $loginInput, 'logowanie', 'account_blocked|' . $ip);
+            $login_error = "Konto jest zablokowane.";
         } else {
-            audit_log($conn, $_POST['user_login'], 'logowanie', 'invalid_user');
-            $login_error = "Nieprawidłowy użytkownik";
+            session_regenerate_id(true);
+            $_SESSION['user_id'] = $id;
+            $_SESSION['name'] = $dbLogin;
+            $_SESSION['user_permissions'] = $usertype;
+            $_SESSION['logged_in'] = true;
+
+            // przy okazji odnawiamy hash, jeśli algorytm domyślny się zmienił
+            if (password_needs_rehash($password, PASSWORD_DEFAULT)) {
+                $newHash = password_hash($_POST['user_password'], PASSWORD_DEFAULT);
+                $upd = $conn->prepare('UPDATE `users` SET `user_password` = ? WHERE `user_id` = ?');
+                if ($upd) {
+                    $upd->bind_param('si', $newHash, $id);
+                    $upd->execute();
+                    $upd->close();
+                }
+            }
+
+            audit_log($conn, $dbLogin, 'logowanie', 'success|' . $ip);
+            header("Location: table/");
+            exit;
         }
         $stmt->close();
     } else {
@@ -127,44 +145,45 @@ if (isset($_POST['user_login'], $_POST['user_password'])) {
 ?>
 
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
+<!DOCTYPE html>
+<html lang="pl">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><?php echo htmlspecialchars($lang_WebTitle ?? 'Kalendarz mechanika', ENT_QUOTES, 'UTF-8'); ?></title>
     <link rel="stylesheet" href="newstyle.css?v=<?php echo filemtime(__DIR__ . '/newstyle.css'); ?>" />
 </head>
 
-<body>
-    <div id="header">
+<body class="login-page">
+    <div class="login-lang">
         <?php require_once "sys-backend/lang.php"; ?>
-        <div id="logo">
-            <h3><?php echo $lang_WebTitle; ?></h3>
-        </div>
-    </div>
-    <div id="wrapper">
-        <div id="content">
-            <h1><?php echo $lang_login; ?></h1>
-
-            <?php if (!empty($login_error)) echo "<p style='color:red'>$login_error</p>"; ?>
-
-            <section class="container">
-                <form action="index.php" method="post">
-                    <label for="user_login"><?php echo $lang_LoginName; ?>:</label>
-                    <input id="user_login" type="text" name="user_login" required><br><br>
-
-                    <label for="user_password"><?php echo $lang_password; ?>:</label>
-                    <input id="user_password" type="password" name="user_password" required><br><br>
-
-                    <input type="submit" value="<?php echo $lang_submit; ?>">
-                </form>
-            </section>
-            <p class='credits'>ekolives &#x24D2; <?php echo date("Y"); ?> v 1.1.3</p>
-        </div>
-
     </div>
 
+    <main class="login-card">
+        <div class="login-brand">
+            <span class="login-brand-dot"></span>
+            <span class="login-brand-name"><?php echo htmlspecialchars($lang_WebTitle, ENT_QUOTES, 'UTF-8'); ?></span>
+        </div>
+
+        <h1><?php echo htmlspecialchars($lang_login, ENT_QUOTES, 'UTF-8'); ?></h1>
+
+        <?php if (!empty($login_error)) : ?>
+            <div class="login-error" role="alert"><?php echo htmlspecialchars($login_error, ENT_QUOTES, 'UTF-8'); ?></div>
+        <?php endif; ?>
+
+        <form action="index.php" method="post" class="login-form">
+            <label for="user_login"><?php echo htmlspecialchars($lang_LoginName, ENT_QUOTES, 'UTF-8'); ?></label>
+            <input id="user_login" type="text" name="user_login" autocomplete="username" autofocus required>
+
+            <label for="user_password"><?php echo htmlspecialchars($lang_password, ENT_QUOTES, 'UTF-8'); ?></label>
+            <input id="user_password" type="password" name="user_password" autocomplete="current-password" required>
+
+            <button type="submit" class="login-submit"><?php echo htmlspecialchars($lang_submit, ENT_QUOTES, 'UTF-8'); ?></button>
+        </form>
+
+        <p class="credits">ekolives &#x24D2; <?php echo date("Y"); ?> v <?php echo htmlspecialchars(trim((string)@file_get_contents(__DIR__ . '/VERSION')), ENT_QUOTES, 'UTF-8'); ?></p>
+    </main>
 </body>
 
 </html>

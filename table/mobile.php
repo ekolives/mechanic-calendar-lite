@@ -401,6 +401,7 @@ function mobile_weekday_name(DateTimeInterface $date): string
         </h2>
 
         <form method="post" action="backend/add_reservation.php">
+<?php echo csrf_field(); ?>
 
             <input type="hidden" name="reservation[mechanic_id]" id="resMechanicId">
 
@@ -470,6 +471,7 @@ function mobile_weekday_name(DateTimeInterface $date): string
         </h2>
 
         <form method="post" action="backend/update_reservation.php" id="editReservationForm">
+<?php echo csrf_field(); ?>
 
             <input type="hidden" name="reservation[slot_id]" id="editSlotId">
             <input type="hidden" name="reservation[nip]" id="editNip">
@@ -723,10 +725,11 @@ function mobile_weekday_name(DateTimeInterface $date): string
 
         form.method = 'post';
         form.action = 'backend/del_reservation.php';
-        form.innerHTML =
-            '<input type="hidden" name="delete_slot_id" value="' +
-            encodeURIComponent(slotId) +
-            '">';
+        const slotInput = document.createElement('input');
+        slotInput.type = 'hidden'; slotInput.name = 'delete_slot_id'; slotInput.value = slotId;
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden'; csrfInput.name = 'csrf_token'; csrfInput.value = '<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>';
+        form.appendChild(slotInput); form.appendChild(csrfInput);
 
         document.body.appendChild(form);
         form.submit();

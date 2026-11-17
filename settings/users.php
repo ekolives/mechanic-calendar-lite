@@ -19,48 +19,64 @@ if ($user_system_permissions != 1) {
 /** @var string $lang_acive */
 /** @var string $lang_inacive */
 
+$h = static fn($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 
-echo "
-<table>
-    <tr>
-        <th>$lang_LoginName</th>
-        <th>$lang_permissions </th>
-        <th>$lang_status</th>
-        <th>$lang_action <a href='add_user.php' class='button-green'> + </a></th>
-    </tr>
-";
-
-    $result = $conn->query("
+$result = $conn->query("
     SELECT user_id, user_login , user_permissions, user_status
     FROM users
     ORDER BY user_id ASC
 ");
+?>
+<div class="settings-page">
+    <section class="settings-card">
+        <div class="settings-card-head settings-card-head-row">
+            <h2><?php echo $h($lang_users ?? 'Użytkownicy'); ?></h2>
+            <a href="add_user.php" class="settings-btn settings-btn-primary">+ Dodaj</a>
+        </div>
 
-    if ($result === false) {
-        echo "<tr><td colspan='2'>Wystąpił błąd podczas pobierania danych.</td></tr>";
-    } else {
-        while ($row = $result->fetch_assoc()) {
-            $user_permissions = $row['user_permissions'];
-
-            switch ($user_permissions) {
-                case 1:
-                    $permissionsText = $lang_admin;
-                    break;
-                case 2:
-                    $permissionsText = $lang_user;
-                    break;
-                default:
-                    $permissionsText = $lang_collaborator;
-            }
-
-            echo "<tr>";
-            echo "<td>" . htmlspecialchars($row['user_login']) . "</td>";
-            echo "<td>" . htmlspecialchars($permissionsText) . "</td>";
-            echo "<td>" . ($row['user_status'] ? $lang_acive : $lang_inacive) . "</td>";
-            echo "<td><a href='edit_user.php?id=" . urlencode($row['user_id']) . "' class='button'>$lang_change</a></td>";
-            echo "</tr>";
-        }
-    }
-
-    ?>
-</table>
+        <div class="settings-table-wrap">
+            <table class="settings-table">
+                <tr>
+                    <th><?php echo $h($lang_LoginName); ?></th>
+                    <th><?php echo $h($lang_permissions); ?></th>
+                    <th><?php echo $h($lang_status); ?></th>
+                    <th></th>
+                </tr>
+                <?php if ($result === false): ?>
+                    <tr><td colspan="4">Wystąpił błąd podczas pobierania danych.</td></tr>
+                <?php else: ?>
+                    <?php while ($row = $result->fetch_assoc()): ?>
+                        <?php
+                        switch ((int) $row['user_permissions']) {
+                            case 1:
+                                $permissionsText = $lang_admin;
+                                $permissionsClass = 'settings-badge-admin';
+                                break;
+                            case 2:
+                                $permissionsText = $lang_user;
+                                $permissionsClass = 'settings-badge-info';
+                                break;
+                            default:
+                                $permissionsText = $lang_collaborator;
+                                $permissionsClass = 'settings-badge-muted';
+                        }
+                        $isActive = (bool) $row['user_status'];
+                        ?>
+                        <tr>
+                            <td><strong><?php echo $h($row['user_login']); ?></strong></td>
+                            <td><span class="settings-badge <?php echo $permissionsClass; ?>"><?php echo $h($permissionsText); ?></span></td>
+                            <td>
+                                <span class="settings-badge <?php echo $isActive ? 'settings-badge-ok' : 'settings-badge-off'; ?>">
+                                    <?php echo $h($isActive ? $lang_acive : $lang_inacive); ?>
+                                </span>
+                            </td>
+                            <td class="settings-actions">
+                                <a href="edit_user.php?id=<?php echo urlencode((string) $row['user_id']); ?>" class="settings-btn"><?php echo $h($lang_change); ?></a>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                <?php endif; ?>
+            </table>
+        </div>
+    </section>
+</div>

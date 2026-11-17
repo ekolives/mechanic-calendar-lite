@@ -2,60 +2,48 @@
 require_once __DIR__ . '/../sys-backend/session_config.php';
 require_once __DIR__ . '/../sys-backend/db_connect.php';
 
-echo $user_system_permissions;
-
 if ($user_system_permissions != 1) {
     require_once __DIR__ . '/no_access.php';
     exit;
 }
+
+$pageTitle = 'Dodaj pracownika';
+$backTab = '1';
+include __DIR__ . '/_header.php';
 ?>
+<form method="post" action="backend/insert_worker.php" class="settings-form">
+    <?php echo csrf_field(); ?>
 
+    <div class="settings-grid">
+        <div class="settings-field settings-field-wide">
+            <label for="name">Imię</label>
+            <input id="name" type="text" name="name" required autofocus>
+        </div>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
+        <div class="settings-field">
+            <label for="work_start">Godzina rozpoczęcia pracy</label>
+            <input id="work_start" type="time" name="work_start" value="08:00" required>
+        </div>
 
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../newstyle.css?v=<?php echo filemtime(__DIR__ . '/../newstyle.css'); ?>" />
-    <title>Kalendarz</title>
+        <div class="settings-field">
+            <label for="work_end">Godzina zakończenia pracy</label>
+            <input id="work_end" type="time" name="work_end" value="16:00" required>
+        </div>
 
-</head>
+        <div class="settings-field">
+            <label for="color">Kolor tła</label>
+            <input id="color" type="color" name="color" value="#2563eb">
+        </div>
 
-<body>
-
-    <div id="header">
-        <?php include "../sys-backend/lang.php"; ?>
-        <div id="logo">
-            <h3>Kalendarz</h3>
+        <div class="settings-field">
+            <label for="font_color">Kolor czcionki</label>
+            <input id="font_color" type="color" name="font_color" value="#ffffff">
         </div>
     </div>
 
-    <div id="wrapper">
-        <div id="content">
-            <h1>Dodaj pracownika</h1>
-    
-<table>
-    <tr>
-        <th>Imię</th>
-        <th>Godzina rozpoczęcia pracy</th>
-        <th>Godzina zakończenia pracy</th>
-        <th>Kolor Tła</th>
-        <th>Kolor Czcionki</th>
-        <th colspan="2">Akcje</th>
-    </tr>
-    <tr>
-        <form method="POST" action="backend/insert_worker.php">
-            <td><input type="text" name="name" required></td>
-            <td><input type="time" name="work_start" required></td>
-            <td><input type="time" name="work_end" required></td>
-            <td><input type="color" name="color" ></td>
-            <td><input type="color" name="font_color" ></td>
-            <td><input type="submit" value="Dodaj"></td>
-            <td><a href="index.php" class="button">Powrót</a></td>
-        </form>
-    </tr>
-</table>
-
-        </div>
+    <div class="settings-form-actions settings-form-actions-split">
+        <a href="index.php?tab=1" class="settings-btn">Powrót</a>
+        <button type="submit" class="settings-btn settings-btn-primary">Dodaj</button>
     </div>
+</form>
+<?php include __DIR__ . '/_footer.php'; ?>

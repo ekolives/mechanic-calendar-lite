@@ -6,42 +6,38 @@ if ($user_system_permissions != 1) {
     require_once __DIR__ . '/no_access.php';
     exit;
 }
+
+$pageTitle = 'Dodaj tłumaczenie';
+$backTab = '4';
+include __DIR__ . '/_header.php';
 ?>
+<form action="backend/add_translation.php" method="post" class="settings-form">
+    <?php echo csrf_field(); ?>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
+    <div class="settings-grid">
+        <div class="settings-field settings-field-wide">
+            <label for="sys">Klucz</label>
+            <input type="text" name="sys" id="sys" placeholder="lang_przyklad" pattern="lang_[A-Za-z0-9_]+" title="Klucz musi zaczynać się od lang_ i zawierać tylko litery, cyfry i _" required autofocus>
+        </div>
 
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../newstyle.css?v=<?php echo filemtime(__DIR__ . '/../newstyle.css'); ?>" />
-    <title>Kalendarz</title>
+        <div class="settings-field">
+            <label for="locale">Locale</label>
+            <select name="locale" id="locale">
+                <option value="pl">pl</option>
+                <option value="en">en</option>
+                <option value="ua">ua</option>
+            </select>
+        </div>
 
-</head>
-
-<body>
-
-    <div id="header">
-        <?php include "../sys-backend/lang.php"; ?>
-        <div id="logo">
-            <h3>Kalendarz</h3>
+        <div class="settings-field settings-field-wide">
+            <label for="name">Tłumaczenie</label>
+            <input type="text" name="name" id="name" required>
         </div>
     </div>
 
-    <div id="wrapper">
-        <div id="content">
-            <h1>Dodaj tłumaczenie</h1>
-            <form action="backend/add_translation.php" method="post">
-                <input type="hidden" name="id" value="">
-                <label for="key">Klucz:</label>
-                <input type="text" name="sys" id="sys" value="" >
-
-                <label for="key">Locale:</label>
-                <input type="text" name="locale" id="locale" value="" >
-
-                <label for="value">Tłumaczenie:</label>
-                <input type="text" name="name" id="name" value="">
-                <input type="submit" value="Zapisz">
-            </form>
-        </div>
+    <div class="settings-form-actions settings-form-actions-split">
+        <a href="index.php?tab=4" class="settings-btn">Powrót</a>
+        <button type="submit" class="settings-btn settings-btn-primary">Zapisz</button>
     </div>
+</form>
+<?php include __DIR__ . '/_footer.php'; ?>

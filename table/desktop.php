@@ -340,32 +340,33 @@ $stmt->close();
             <div id="reservationModal" class="modal-backdrop">
                 <div class="modal">
                     <button type="button" id="closeModal" class="modal-close">×</button>
-                    <h2><?php echo $lang_new_reservation_for; ?> - <span id="resMechanicName"></span></h2>
+                    <h2><?php echo esc($lang_new_reservation_for); ?> - <span id="resMechanicName"></span></h2>
                     <form method="post" action="backend/add_reservation.php">
+<?php echo csrf_field(); ?>
                         <input type="hidden" name="reservation[mechanic_id]" id="resMechanicId">
-                        <label><?php echo $lang_date; ?>:
+                        <label><?php echo esc($lang_date); ?>:
                             <input type="date" name="reservation[slot_date]" id="resSlotDateInput" required>
                         </label>
                         <div class="edit-time-row">
-                            <label><?php echo $lang_time_start; ?>:
+                            <label><?php echo esc($lang_time_start); ?>:
                                 <input type="time" name="reservation[slot_start]" id="resSlotStart" step="1800" required>
                             </label>
 
-                            <label><?php echo $lang_time_end; ?>:
+                            <label><?php echo esc($lang_time_end); ?>:
                                 <input type="time" name="reservation[slot_time_end]" id="resSlotEnd" step="1800" required>
                             </label>
                         </div>
-                        <label><?php echo $lang_title; ?>:
+                        <label><?php echo esc($lang_title); ?>:
                             <input type="text" name="reservation[title]" required>
                         </label>
-                        <label><?php echo $lang_description; ?>:
+                        <label><?php echo esc($lang_description); ?>:
                             <textarea name="reservation[reservation_description]" rows="3"></textarea>
                         </label>
-                        <label class="inline-label"><?php echo $lang_phone; ?>:
+                        <label class="inline-label"><?php echo esc($lang_phone); ?>:
                             <input type="text" name="reservation[phone]">
                         </label>
 
-                        <label class="inline-label"><?php echo $lang_vin; ?>:
+                        <label class="inline-label"><?php echo esc($lang_vin); ?>:
                             <input
                                 type="text"
                                 name="reservation[vin]"
@@ -374,10 +375,10 @@ $stmt->close();
                                 pattern="[A-Za-z0-9]{17}">
                         </label>
 
-                        <label class="inline-label"><?php echo $lang_plate; ?>:
+                        <label class="inline-label"><?php echo esc($lang_plate); ?>:
                             <input type="text" name="reservation[plate]">
                         </label>
-                        <button type="submit" class="button-green"><?php echo $lang_save_reservation; ?></button>
+                        <button type="submit" class="button-green"><?php echo esc($lang_save_reservation); ?></button>
                     </form>
                 </div>
             </div>
@@ -389,8 +390,9 @@ $stmt->close();
             <div id="editModal" class="modal-backdrop">
                 <div class="modal">
                     <button type="button" id="closeEditModal" class="modal-close">×</button>
-                    <h2><?php echo $lang_edit_reservation; ?> - <a id="editReservationNumber" href="#" target="_blank" style="color: inherit; text-decoration: none;"></a></h2>
+                    <h2><?php echo esc($lang_edit_reservation); ?> - <a id="editReservationNumber" href="#" target="_blank" style="color: inherit; text-decoration: none;"></a></h2>
                     <form method="post" action="backend/update_reservation.php" id="editReservationForm">
+<?php echo csrf_field(); ?>
                         <input type="hidden" name="reservation[slot_id]" id="editSlotId">
                         <input type="hidden" name="reservation[nip]" id="editNip">
                         <input type="hidden" name="reservation[receipt_or_invoice]" id="editReceiptOrInvoice">
@@ -399,11 +401,11 @@ $stmt->close();
 
 
                         <div class="edit-time-row">
-                            <label><?php echo $lang_date; ?>:
+                            <label><?php echo esc($lang_date); ?>:
                                 <input type="date" name="reservation[slot_date]" id="editSlotDate" required>
                             </label>
 
-                            <label><?php echo $lang_slot_name; ?>:
+                            <label><?php echo esc($lang_slot_name); ?>:
                                 <select name="reservation[mechanic_id]" id="editMechanicId">
 
                                     <?php foreach ($mechanics as $mechanicId => $mechanicName): ?>
@@ -415,7 +417,7 @@ $stmt->close();
                         </div>
                         <div class="edit-time-row">
                             <label>
-                                <?php echo $lang_time_start; ?>:
+                                <?php echo esc($lang_time_start); ?>:
                                 <input type="time"
                                     name="reservation[slot_start]"
                                     id="editSlotStart"
@@ -424,7 +426,7 @@ $stmt->close();
                             </label>
 
                             <label>
-                                <?php echo $lang_time_end; ?>:
+                                <?php echo esc($lang_time_end); ?>:
                                 <input type="time"
                                     name="reservation[slot_time_end]"
                                     id="editSlotEnd"
@@ -433,22 +435,22 @@ $stmt->close();
                             </label>
                         </div>
 
-                        <label><?php echo $lang_title; ?>:
+                        <label><?php echo esc($lang_title); ?>:
                             <input type="text" name="reservation[title]" id="editTitle" required>
                         </label>
 
-                        <label><?php echo $lang_description; ?>:
+                        <label><?php echo esc($lang_description); ?>:
                             <textarea name="reservation[reservation_description]" id="editDescription" rows="4"></textarea>
                         </label>
 
-                        <label class="inline-label"><?php echo $lang_phone; ?>:
+                        <label class="inline-label"><?php echo esc($lang_phone); ?>:
                             <input type="text" name="reservation[phone]" id="editPhone">
                         </label>
 
 
 
 
-                        <label class="inline-label"><?php echo $lang_vin; ?>:
+                        <label class="inline-label"><?php echo esc($lang_vin); ?>:
                             <input
                                 type="text"
                                 name="reservation[vin]"
@@ -461,22 +463,22 @@ $stmt->close();
 
 
                         <div class="edit-time-row">
-                            <label><?php echo $lang_plate; ?>:
+                            <label><?php echo esc($lang_plate); ?>:
                                 <input type="text" name="reservation[plate]" id="editPlate" style="width: 200px;">
                             </label>
-                            <?php echo $lang_cancelled; ?>
-                            <input type="radio" name="reservation[state]" id="editStateTak" value="1"><?php echo $lang_yes; ?>
-                            <input type="radio" name="reservation[state]" id="editStateNie" value="0"><?php echo $lang_no; ?>
+                            <?php echo esc($lang_cancelled); ?>
+                            <input type="radio" name="reservation[state]" id="editStateTak" value="1"><?php echo esc($lang_yes); ?>
+                            <input type="radio" name="reservation[state]" id="editStateNie" value="0"><?php echo esc($lang_no); ?>
                         </div>
 
                         <div class="sys-box">
                             <div class="edit-meta-row">
-                                <div><small><?php echo $lang_creation_date; ?>: <span id="editCreationDate"></span></small></div>
-                                <div><small><?php echo $lang_created_by; ?>: <span id="editCreatedBy"></span></small></div>
+                                <div><small><?php echo esc($lang_creation_date); ?>: <span id="editCreationDate"></span></small></div>
+                                <div><small><?php echo esc($lang_created_by); ?>: <span id="editCreatedBy"></span></small></div>
                             </div>
                             <div class="edit-meta-row">
-                                <div><small><?php echo $lang_updated_date; ?>: <span id="editUpdatedDate"></span></small></div>
-                                <div><small><?php echo $lang_updated_by; ?>: <span id="editUpdatedBy"></span></small></div>
+                                <div><small><?php echo esc($lang_updated_date); ?>: <span id="editUpdatedDate"></span></small></div>
+                                <div><small><?php echo esc($lang_updated_by); ?>: <span id="editUpdatedBy"></span></small></div>
                             </div>
 
                             <input type="hidden" id="editReservationDate">
@@ -484,8 +486,8 @@ $stmt->close();
                         </div>
 
                         <div id="editButtons" style="display: flex; gap: 10px; margin-top: 10px;">
-                            <button type="submit" style="flex: 1" class="button-green"><?php echo $lang_save_changes ?></button>
-                            <button type="button" id="deleteBtn" style="flex: 1; background: #dc2626;"><?php echo $lang_delete; ?></button>
+                            <button type="submit" style="flex: 1" class="button-green"><?php echo esc($lang_save_changes) ?></button>
+                            <button type="button" id="deleteBtn" style="flex: 1; background: #dc2626;"><?php echo esc($lang_delete); ?></button>
                         </div>
                         <div id="editDisabledMessage" class="button-orange" style="display: none; margin-top: 10px;"></div>
                 </div>
@@ -638,7 +640,11 @@ $stmt->close();
                     const form = document.createElement('form');
                     form.method = 'post';
                     form.action = 'backend/del_reservation.php';
-                    form.innerHTML = '<input type="hidden" name="delete_slot_id" value="' + slotId + '">';
+                    const slotInput = document.createElement('input');
+                    slotInput.type = 'hidden'; slotInput.name = 'delete_slot_id'; slotInput.value = slotId;
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden'; csrfInput.name = 'csrf_token'; csrfInput.value = '<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>';
+                    form.appendChild(slotInput); form.appendChild(csrfInput);
                     document.body.appendChild(form);
                     form.submit();
                 }
