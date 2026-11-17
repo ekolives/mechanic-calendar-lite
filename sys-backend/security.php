@@ -89,7 +89,8 @@ function safe_referer_redirect(string $fallback): void
 /** Skrót do escapowania wartości wypisywanych w HTML (w tym w atrybutach). */
 function esc($value): string
 {
-    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+    // ENT_SUBSTITUTE: niepoprawne bajty UTF-8 zamieniane są na znak zastępczy, zamiast zwracać pusty tekst
+    return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
 /**

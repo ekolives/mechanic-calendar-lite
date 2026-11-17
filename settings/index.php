@@ -21,12 +21,12 @@ if ($user_system_permissions != 1) {
 
 // Jeśli parametr tab jest w URL, zapisz go w sesji
 if (isset($_GET['tab'])) {
-    $_SESSION['active_tab'] = in_array((string)$_GET['tab'], ['1','2','3','4','5'], true) ? (string)$_GET['tab'] : '1';
+    $_SESSION['active_tab'] = in_array((string)$_GET['tab'], ['1','2','3','4','5','6'], true) ? (string)$_GET['tab'] : '1';
 }
 
 // Jeśli jest wysłany hidden input z forma, zaktualizuj sesję
 if (isset($_POST['active_tab'])) {
-    $_SESSION['active_tab'] = in_array((string)$_POST['active_tab'], ['1','2','3','4','5'], true) ? (string)$_POST['active_tab'] : '1';
+    $_SESSION['active_tab'] = in_array((string)$_POST['active_tab'], ['1','2','3','4','5','6'], true) ? (string)$_POST['active_tab'] : '1';
 }
 
 // Pobierz aktywny tab ze sesji, domyślnie 1
@@ -112,6 +112,7 @@ $activeTab = $_SESSION['active_tab'] ?? '1';
                     <div class="tab" data-tab="3"><?php echo esc($lang_help) ?></div>
                     <div class="tab" data-tab="4"><?php echo esc($lang_slot_translations) ?></div>
                     <div class="tab" data-tab="5"><?php echo esc($lang_settings) ?></div>
+                    <div class="tab" data-tab="6">Audyt</div>
                 </div>
 
                 <div class="desktop-toolbar-actions">
@@ -153,6 +154,15 @@ $activeTab = $_SESSION['active_tab'] ?? '1';
                 <?php include "settings.php"; ?>
             </div>
 
+            <div id="tab-6" class="tab-content <?php echo ($activeTab === '6') ? 'active' : ''; ?>">
+                <?php
+                // audyt ładujemy tylko gdy zakładka jest aktywna - nie obciąża pozostałych zakładek zapytaniami
+                if ($activeTab === '6') {
+                    include "audit.php";
+                }
+                ?>
+            </div>
+
         </div>
     </div>
 
@@ -168,6 +178,12 @@ $activeTab = $_SESSION['active_tab'] ?? '1';
                 
                 // Pomiń link do kalendarza
                 if (tabNum === '0') return;
+
+                // Audyt jest ładowany po stronie serwera tylko dla aktywnej zakładki - wymaga przeładowania
+                if (tabNum === '6') {
+                    window.location.href = 'index.php?tab=6';
+                    return;
+                }
                 
                 // Ustaw aktywny tab w UI
                 tabs.forEach(t => t.classList.remove('active'));
