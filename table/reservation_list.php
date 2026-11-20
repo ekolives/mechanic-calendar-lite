@@ -60,7 +60,7 @@ if (isset($_GET['date_to']) && !empty($_GET['date_to'])) {
         <form method="get" action="reservation_list.php">
             <div class="filter-card">
                 <div class="filter-field">
-                    <label>Slot</label>
+                    <label><?php echo htmlspecialchars($lang_slot ?? 'Slot', ENT_QUOTES, 'UTF-8'); ?></label>
 <?php
 // get available slots from SELECT * FROM `mechanics`
 $permittedIds = permitted_mechanic_ids($conn, $userId);
@@ -76,7 +76,7 @@ $stmt->close();
 $selectedMechanic = isset($_GET['slot_id']) ? (string)(int)$_GET['slot_id'] : '';
 
 echo '<select name="slot_id">';
-echo '<option value="">Wszyscy</option>';
+echo '<option value="">' . htmlspecialchars($lang_all ?? 'Wszyscy', ENT_QUOTES, 'UTF-8') . '</option>';
 
 while ($mechanic = $mechanics->fetch_assoc()) {
 
@@ -92,36 +92,36 @@ echo '</select>';
                 </div>
 
                 <div class="filter-field">
-                    <label>Data od</label>
+                    <label><?php echo htmlspecialchars($lang_date_from ?? 'Data od', ENT_QUOTES, 'UTF-8'); ?></label>
                     <input type="date" name="date_from" value="<?php echo htmlspecialchars($date_from->format('Y-m-d'), ENT_QUOTES, 'UTF-8'); ?>">
                 </div>
                 <div class="filter-field">
-                    <label>Data do</label>
+                    <label><?php echo htmlspecialchars($lang_date_to ?? 'Data do', ENT_QUOTES, 'UTF-8'); ?></label>
                     <input type="date" name="date_to" value="<?php echo htmlspecialchars($date_to->format('Y-m-d'), ENT_QUOTES, 'UTF-8'); ?>">
                 </div>
                 <div class="filter-field filter-field-wide">
-                    <label>Treść</label>
+                    <label><?php echo htmlspecialchars($lang_content ?? 'Treść', ENT_QUOTES, 'UTF-8'); ?></label>
                     <input type="text" name="reservation_search" value="<?php echo htmlspecialchars($_GET['reservation_search'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                 </div>
                 <div class="filter-field">
-                    <label>Telefon</label>
+                    <label><?php echo htmlspecialchars($lang_phone ?? 'Telefon', ENT_QUOTES, 'UTF-8'); ?></label>
                     <input type="text" name="reservation_phone" value="<?php echo htmlspecialchars($_GET['reservation_phone'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 130px;" />
                 </div>
                 <div class="filter-field">
-                    <label>VIN</label>
+                    <label><?php echo htmlspecialchars($lang_vin ?? 'VIN', ENT_QUOTES, 'UTF-8'); ?></label>
                     <input type="text" name="reservation_vin" value="<?php echo htmlspecialchars($_GET['reservation_vin'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 180px;" />
                 </div>
                 <div class="filter-field">
-                    <label>Rejestracja</label>
+                    <label><?php echo htmlspecialchars($lang_plate ?? 'Rejestracja', ENT_QUOTES, 'UTF-8'); ?></label>
                     <input type="text" name="reservation_plate" value="<?php echo htmlspecialchars($_GET['reservation_plate'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 110px;" />
                 </div>
                 <div class="filter-field filter-field-check">
-                    <label class="filter-check"><input type="checkbox" name="reservation_rejected" value="1" <?php echo isset($_GET['reservation_rejected']) ? 'checked' : ''; ?>> Odwołana</label>
+                    <label class="filter-check"><input type="checkbox" name="reservation_rejected" value="1" <?php echo isset($_GET['reservation_rejected']) ? 'checked' : ''; ?>> <?php echo htmlspecialchars($lang_cancelled ?? 'Odwołana', ENT_QUOTES, 'UTF-8'); ?></label>
                 </div>
 
                 <div class="filter-actions">
-                    <button type="submit" class="filter-submit">Filtruj</button>
-                    <a href="reservation_list.php" class="filter-clear">Wyczyść filtr</a>
+                    <button type="submit" class="filter-submit"><?php echo htmlspecialchars($lang_filter ?? 'Filtruj', ENT_QUOTES, 'UTF-8'); ?></button>
+                    <a href="reservation_list.php" class="filter-clear"><?php echo htmlspecialchars($lang_clear_filter ?? 'Wyczyść filtr', ENT_QUOTES, 'UTF-8'); ?></a>
                 </div>
             </div>
 
@@ -130,15 +130,15 @@ echo '</select>';
 
                 <table>
                     <tr>
-                        <th>Data</th>
-                        <th>Nazwa Slotu</th>
-                        <th>Start</th>
-                        <th>End</th>
-                        <th>Tytuł</th>
-                        <th>Opis</th>
-                        <th>Telefon</th>
-                        <th>VIN</th>
-                        <th>Rej</th>
+                        <th><?php echo htmlspecialchars($lang_date ?? 'Data', ENT_QUOTES, 'UTF-8'); ?></th>
+                        <th><?php echo htmlspecialchars($lang_slot_name ?? 'Nazwa Slotu', ENT_QUOTES, 'UTF-8'); ?></th>
+                        <th><?php echo htmlspecialchars($lang_time_start ?? 'Start', ENT_QUOTES, 'UTF-8'); ?></th>
+                        <th><?php echo htmlspecialchars($lang_time_end ?? 'End', ENT_QUOTES, 'UTF-8'); ?></th>
+                        <th><?php echo htmlspecialchars($lang_title ?? 'Tytuł', ENT_QUOTES, 'UTF-8'); ?></th>
+                        <th><?php echo htmlspecialchars($lang_description ?? 'Opis', ENT_QUOTES, 'UTF-8'); ?></th>
+                        <th><?php echo htmlspecialchars($lang_phone ?? 'Telefon', ENT_QUOTES, 'UTF-8'); ?></th>
+                        <th><?php echo htmlspecialchars($lang_vin ?? 'VIN', ENT_QUOTES, 'UTF-8'); ?></th>
+                        <th><?php echo htmlspecialchars($lang_plate ?? 'Rej', ENT_QUOTES, 'UTF-8'); ?></th>
                     </tr>
                     <?php
 
@@ -275,7 +275,7 @@ echo '</select>';
 
                 // Pierwsza
                 if ($page > 1) {
-                    echo '<a href="' . htmlspecialchars(build_page_link(1, $query_string), ENT_QUOTES, 'UTF-8') . '" class="button">Pierwsza</a> - ';
+                    echo '<a href="' . htmlspecialchars(build_page_link(1, $query_string), ENT_QUOTES, 'UTF-8') . '" class="button">' . htmlspecialchars($lang_first ?? 'Pierwsza', ENT_QUOTES, 'UTF-8') . '</a> - ';
                 }
 
                 // numery stron
@@ -296,7 +296,7 @@ echo '</select>';
 
                 // Ostatnia
                 if ($page < $total_pages) {
-                    echo '- <a href="' . htmlspecialchars(build_page_link($total_pages, $query_string), ENT_QUOTES, 'UTF-8') . '" class="button">Ostatnia</a>';
+                    echo '- <a href="' . htmlspecialchars(build_page_link($total_pages, $query_string), ENT_QUOTES, 'UTF-8') . '" class="button">' . htmlspecialchars($lang_last ?? 'Ostatnia', ENT_QUOTES, 'UTF-8') . '</a>';
                 }
 
                 echo '</div>';

@@ -205,6 +205,20 @@ if (isset($_GET['date']) && is_string($_GET['date'])) {
             <button type="submit" class="settings-btn settings-btn-primary">Zapisz ustawienia SMTP</button>
         </div>
     </form>
+    <script>
+    (function () {
+        var enabled = document.getElementById('smtp_enabled');
+        var fields = ['smtp_host', 'smtp_port', 'from_email'].map(function (id) {
+            return document.getElementById(id);
+        });
+        function sync() {
+            var on = enabled.value === '1';
+            fields.forEach(function (f) { f.required = on; });
+        }
+        enabled.addEventListener('change', sync);
+        sync();
+    })();
+    </script>
 </section>
 
 </div>

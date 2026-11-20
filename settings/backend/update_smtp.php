@@ -30,12 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $smtpError = 'Nieprawidłowa wartość przełącznika.';
     } elseif (!in_array($smtp_encryption, ['tls', 'ssl', ''], true)) {
         $smtpError = 'Nieprawidłowy typ szyfrowania.';
-    } elseif ($smtp_port < 1 || $smtp_port > 65535) {
+    } elseif ($smtp_enabled === 1 && ($smtp_port < 1 || $smtp_port > 65535)) {
         $smtpError = 'Port SMTP musi być liczbą od 1 do 65535.';
-    } elseif ($smtp_host === '' || !preg_match('/^[A-Za-z0-9.\-]{1,255}$/', $smtp_host)) {
+    } elseif ($smtp_enabled === 1 && ($smtp_host === '' || !preg_match('/^[A-Za-z0-9.\-]{1,255}$/', $smtp_host))) {
         $smtpError = 'Nieprawidłowy host SMTP.';
-    } elseif (!filter_var($from_email, FILTER_VALIDATE_EMAIL)) {
+    } elseif (($smtp_enabled === 1 || $from_email !== '') && !filter_var($from_email, FILTER_VALIDATE_EMAIL)) {
         $smtpError = 'Nieprawidłowy adres e-mail nadawcy.';
+    } elseif ($smtp_enabled === 0 && $smtp_host !== '' && !preg_match('/^[A-Za-z0-9.\-]{1,255}$/', $smtp_host)) {
+        $smtpError = 'Nieprawidłowy host SMTP.';
     } elseif ($reply_to_email !== '' && !filter_var($reply_to_email, FILTER_VALIDATE_EMAIL)) {
         $smtpError = 'Nieprawidłowy adres Reply-To.';
     } elseif ($test_email !== '' && !filter_var($test_email, FILTER_VALIDATE_EMAIL)) {
@@ -43,6 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (mb_strlen($from_name) > 100 || preg_match('/[
 ]/', $from_name)) {
         $smtpError = 'Nieprawidłowa nazwa nadawcy.';
+    }
+    if ($smtpError === null && ($smtp_port < 1 || $smtp_port > 65535)) {
+        $smtp_port = 587; // wysyłka wyłączona – nie zapisuj nieprawidłowego portu
     }
     if ($smtpError !== null) {
         $_SESSION['smtp_message_error'] = $smtpError;

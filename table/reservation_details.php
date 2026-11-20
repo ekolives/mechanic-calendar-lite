@@ -61,7 +61,7 @@ $state = (int)$slot['reservation_state'];
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="../newstyle.css?v=<?php echo filemtime(__DIR__ . '/../newstyle.css'); ?>" />
-    <title><?php echo $h($reservationNumber); ?> - Edycja rezerwacji</title>
+    <title><?php echo $h($reservationNumber); ?> - <?php echo $h($lang_edit_reservation ?? 'Edycja rezerwacji'); ?></title>
 </head>
 
 <body>
@@ -75,8 +75,8 @@ $state = (int)$slot['reservation_state'];
                 </h3>
 
                 <div class="desktop-toolbar-actions">
-                    <a href="reservation_list.php" class="button desktop-toolbar-external-link">← Lista rezerwacji</a>
-                    <a href="index.php" class="button desktop-toolbar-external-link">Kalendarz</a>
+                    <a href="reservation_list.php" class="button desktop-toolbar-external-link">← <?php echo $h($lang_reservation_list ?? 'Lista rezerwacji'); ?></a>
+                    <a href="index.php" class="button desktop-toolbar-external-link"><?php echo $h($lang_calendar ?? 'Kalendarz'); ?></a>
                 </div>
 
                 <div class="calendar-header-tools">
@@ -114,36 +114,36 @@ $state = (int)$slot['reservation_state'];
 
                     <section class="settings-card">
                         <div class="settings-card-head">
-                            <h2>Edycja rezerwacji <?php echo $h($reservationNumber); ?></h2>
+                            <h2><?php echo $h($lang_edit_reservation ?? 'Edycja rezerwacji'); ?> <?php echo $h($reservationNumber); ?></h2>
                         </div>
 
                         <div class="details-columns">
                             <!-- lewa kolumna: termin -->
                             <div class="settings-grid details-col">
                                 <div class="settings-field settings-field-wide">
-                                    <label for="slot_number">Numer rezerwacji</label>
+                                    <label for="slot_number"><?php echo $h($lang_reservation_number ?? 'Numer rezerwacji'); ?></label>
                                     <input id="slot_number" type="text" name="reservation[slot_number]" value="<?php echo $h($reservationNumber); ?>" readonly>
                                 </div>
 
                                 <div class="settings-field settings-field-wide">
-                                    <label for="slot_date">Data</label>
+                                    <label for="slot_date"><?php echo $h($lang_date ?? 'Data'); ?></label>
                                     <input id="slot_date" type="date" name="reservation[slot_date]" value="<?php echo $h($slot['slot_date']); ?>" required>
                                 </div>
 
                                 <div class="settings-field">
-                                    <label for="slot_start">Godzina start</label>
+                                    <label for="slot_start"><?php echo $h($lang_time_start ?? 'Godzina start'); ?></label>
                                     <input id="slot_start" type="time" name="reservation[slot_start]" value="<?php echo $h(substr($slot['slot_time_start'], 0, 5)); ?>" required>
                                 </div>
 
                                 <div class="settings-field">
-                                    <label for="slot_end">Godzina koniec</label>
+                                    <label for="slot_end"><?php echo $h($lang_time_end ?? 'Godzina koniec'); ?></label>
                                     <input id="slot_end" type="time" name="reservation[slot_time_end]" value="<?php echo $h(substr($slot['slot_time_end'], 0, 5)); ?>" required>
                                 </div>
 
                                 <div class="settings-field settings-field-wide">
-                                    <label for="mechanic_id">Mechanik</label>
+                                    <label for="mechanic_id"><?php echo $h($lang_mechanic ?? 'Mechanik'); ?></label>
                                     <select id="mechanic_id" name="reservation[mechanic_id]" required>
-                                        <option value="">-- wybierz mechanika --</option>
+                                        <option value=""><?php echo $h($lang_choose_mechanic ?? '-- wybierz mechanika --'); ?></option>
                                         <?php if ($mechanicsResult): ?>
                                             <?php while ($m = $mechanicsResult->fetch_assoc()): ?>
                                                 <option value="<?php echo (int)$m['mechanic_id']; ?>" <?php echo ((int)$m['mechanic_id'] === (int)$slot['mechanic_id']) ? 'selected' : ''; ?>>
@@ -160,21 +160,21 @@ $state = (int)$slot['reservation_state'];
                                     <div class="details-radios">
                                         <label class="settings-check">
                                             <input type="radio" name="reservation[receipt_or_invoice]" value="0" <?php echo $receipt === 0 ? 'checked' : ''; ?>>
-                                            <span>Paragon</span>
+                                            <span><?php echo $h($lang_receipt ?? 'Paragon'); ?></span>
                                         </label>
                                         <label class="settings-check">
                                             <input type="radio" name="reservation[receipt_or_invoice]" value="1" <?php echo $receipt === 1 ? 'checked' : ''; ?>>
-                                            <span>Faktura</span>
+                                            <span><?php echo $h($lang_invoice ?? 'Faktura'); ?></span>
                                         </label>
                                     </div>
                                 </div>
 
                                 <div class="settings-field settings-field-wide">
-                                    <label for="state">Status</label>
+                                    <label for="state"><?php echo $h($lang_status ?? 'Status'); ?></label>
                                     <select id="state" name="reservation[state]">
-                                        <option value="0" <?php echo $state === 0 ? 'selected' : ''; ?>>Aktywna</option>
-                                        <option value="1" <?php echo $state === 1 ? 'selected' : ''; ?>>Anulowana</option>
-                                        <option value="2" <?php echo $state === 2 ? 'selected' : ''; ?>>Zakończona</option>
+                                        <option value="0" <?php echo $state === 0 ? 'selected' : ''; ?>><?php echo $h($lang_state_active ?? 'Aktywna'); ?></option>
+                                        <option value="1" <?php echo $state === 1 ? 'selected' : ''; ?>><?php echo $h($lang_state_cancelled ?? 'Anulowana'); ?></option>
+                                        <option value="2" <?php echo $state === 2 ? 'selected' : ''; ?>><?php echo $h($lang_state_finished ?? 'Zakończona'); ?></option>
                                     </select>
                                 </div>
                             </div>
@@ -182,52 +182,52 @@ $state = (int)$slot['reservation_state'];
                             <!-- prawa kolumna: opis i dane pojazdu -->
                             <div class="settings-grid details-col">
                                 <div class="settings-field settings-field-wide">
-                                    <label for="title">Tytuł</label>
+                                    <label for="title"><?php echo $h($lang_title ?? 'Tytuł'); ?></label>
                                     <input id="title" type="text" name="reservation[title]" value="<?php echo $h($slot['reservation_title']); ?>">
                                 </div>
 
                                 <div class="settings-field settings-field-wide">
-                                    <label for="description">Opis</label>
+                                    <label for="description"><?php echo $h($lang_description ?? 'Opis'); ?></label>
                                     <textarea id="description" name="reservation[reservation_description]" rows="5"><?php echo $h($slot['reservation_description']); ?></textarea>
                                 </div>
 
                                 <div class="settings-field settings-field-wide">
-                                    <label for="phone">Telefon</label>
+                                    <label for="phone"><?php echo $h($lang_phone ?? 'Telefon'); ?></label>
                                     <input id="phone" type="text" name="reservation[phone]" value="<?php echo $h($slot['reservation_phone']); ?>">
                                 </div>
 
                                 <div class="settings-field settings-field-wide">
-                                    <label for="vin">VIN</label>
+                                    <label for="vin"><?php echo $h($lang_vin ?? 'VIN'); ?></label>
                                     <input id="vin" type="text" name="reservation[vin]" value="<?php echo $h($slot['reservation_vin']); ?>" maxlength="17">
                                 </div>
 
                                 <div class="settings-field">
-                                    <label for="plate">Rejestracja</label>
+                                    <label for="plate"><?php echo $h($lang_plate ?? 'Rejestracja'); ?></label>
                                     <input id="plate" type="text" name="reservation[plate]" value="<?php echo $h($slot['reservation_plate']); ?>">
                                 </div>
 
                                 <div class="settings-field">
-                                    <label for="odometer">Przebieg auta</label>
+                                    <label for="odometer"><?php echo $h($lang_odometer ?? 'Przebieg auta'); ?></label>
                                     <input id="odometer" type="text" name="reservation[odometer]" value="<?php echo $h($slot['odometer'] ?? ''); ?>">
                                 </div>
                             </div>
                         </div>
 
                         <div class="settings-field details-comment">
-                            <label for="comment">Komentarz mechanika</label>
+                            <label for="comment"><?php echo $h($lang_mechanic_comment ?? 'Komentarz mechanika'); ?></label>
                             <textarea id="comment" name="reservation[comment]" rows="3"><?php echo $h($slot['comment'] ?? ''); ?></textarea>
                         </div>
 
                         <div class="settings-form-actions settings-form-actions-split">
-                            <a href="reservation_list.php" class="settings-btn">Powrót do listy</a>
-                            <button type="submit" class="settings-btn settings-btn-primary">Zapisz zmiany</button>
+                            <a href="reservation_list.php" class="settings-btn"><?php echo $h($lang_back_to_list ?? 'Powrót do listy'); ?></a>
+                            <button type="submit" class="settings-btn settings-btn-primary"><?php echo $h($lang_save_changes ?? 'Zapisz zmiany'); ?></button>
                         </div>
                     </section>
                 </form>
 
                 <div class="details-meta">
-                    <div>Utworzono: <strong><?php echo $h($slot['sys_createdate']); ?></strong> przez <strong><?php echo $h($submiterName); ?></strong></div>
-                    <div>Ostatnia aktualizacja: <strong><?php echo $h($slot['sys_updatedate']); ?></strong> przez <strong><?php echo $h($updaterName); ?></strong></div>
+                    <div><?php echo $h($lang_created ?? 'Utworzono'); ?>: <strong><?php echo $h($slot['sys_createdate']); ?></strong> <?php echo $h($lang_by ?? 'przez'); ?> <strong><?php echo $h($submiterName); ?></strong></div>
+                    <div><?php echo $h($lang_last_update ?? 'Ostatnia aktualizacja'); ?>: <strong><?php echo $h($slot['sys_updatedate']); ?></strong> <?php echo $h($lang_by ?? 'przez'); ?> <strong><?php echo $h($updaterName); ?></strong></div>
                 </div>
 
             </div>

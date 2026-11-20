@@ -208,7 +208,59 @@ INSERT INTO `language` (`id`, `sys`, `locale`, `name`) VALUES
 (301, 'lang_acive', 'pl', 'Aktywny'),
 (302, 'lang_acive', 'en', 'Active'),
 (303, 'lang_inacive', 'en', 'Inactive'),
-(304, 'lang_inacive', 'pl', 'Nieaktywny');
+(304, 'lang_inacive', 'pl', 'Nieaktywny'),
+(305, 'lang_slot', 'pl', 'Slot'),
+(306, 'lang_slot', 'en', 'Slot'),
+(307, 'lang_all', 'pl', 'Wszyscy'),
+(308, 'lang_all', 'en', 'All'),
+(309, 'lang_date_from', 'pl', 'Data od'),
+(310, 'lang_date_from', 'en', 'Date from'),
+(311, 'lang_date_to', 'pl', 'Data do'),
+(312, 'lang_date_to', 'en', 'Date to'),
+(313, 'lang_content', 'pl', 'Treść'),
+(314, 'lang_content', 'en', 'Content'),
+(315, 'lang_filter', 'pl', 'Filtruj'),
+(316, 'lang_filter', 'en', 'Filter'),
+(317, 'lang_clear_filter', 'pl', 'Wyczyść filtr'),
+(318, 'lang_clear_filter', 'en', 'Clear filter'),
+(319, 'lang_first', 'pl', 'Pierwsza'),
+(320, 'lang_first', 'en', 'First'),
+(321, 'lang_last', 'pl', 'Ostatnia'),
+(322, 'lang_last', 'en', 'Last'),
+(323, 'lang_calendar', 'pl', 'Kalendarz'),
+(324, 'lang_calendar', 'en', 'Calendar'),
+(325, 'lang_reservation_number', 'pl', 'Numer rezerwacji'),
+(326, 'lang_reservation_number', 'en', 'Reservation number'),
+(327, 'lang_choose_mechanic', 'pl', '-- wybierz mechanika --'),
+(328, 'lang_choose_mechanic', 'en', '-- select mechanic --'),
+(329, 'lang_receipt', 'pl', 'Paragon'),
+(330, 'lang_receipt', 'en', 'Receipt'),
+(331, 'lang_invoice', 'pl', 'Faktura'),
+(332, 'lang_invoice', 'en', 'Invoice'),
+(333, 'lang_state_active', 'pl', 'Aktywna'),
+(334, 'lang_state_active', 'en', 'Active'),
+(335, 'lang_state_cancelled', 'pl', 'Anulowana'),
+(336, 'lang_state_cancelled', 'en', 'Cancelled'),
+(337, 'lang_state_finished', 'pl', 'Zakończona'),
+(338, 'lang_state_finished', 'en', 'Finished'),
+(339, 'lang_odometer', 'pl', 'Przebieg auta'),
+(340, 'lang_odometer', 'en', 'Odometer'),
+(341, 'lang_mechanic_comment', 'pl', 'Komentarz mechanika'),
+(342, 'lang_mechanic_comment', 'en', 'Mechanic comment'),
+(343, 'lang_back_to_list', 'pl', 'Powrót do listy'),
+(344, 'lang_back_to_list', 'en', 'Back to list'),
+(345, 'lang_created', 'pl', 'Utworzono'),
+(346, 'lang_created', 'en', 'Created'),
+(347, 'lang_by', 'pl', 'przez'),
+(348, 'lang_by', 'en', 'by'),
+(349, 'lang_last_update', 'pl', 'Ostatnia aktualizacja'),
+(350, 'lang_last_update', 'en', 'Last update'),
+(351, 'lang_this_week', 'pl', 'Obecny tydzień'),
+(352, 'lang_this_week', 'en', 'Current week'),
+(353, 'lang_today', 'pl', 'Dzisiaj'),
+(354, 'lang_today', 'en', 'Today')
+;
+
 
 -- --------------------------------------------------------
 
@@ -279,6 +331,13 @@ CREATE TABLE `settings` (
   `setting_sort` int(11) NOT NULL,
   `setting_locale` varchar(10) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Zrzut danych tabeli `settings`
+--
+
+INSERT INTO `settings` (`sys_id`, `sys_submiter`, `sys_createdate`, `sys_updatedby`, `sys_updatedate`, `status`, `setting_number`, `setting_name`, `setting_values`, `setting_sort`, `setting_locale`) VALUES
+(1, 'InstallAdmin', '2026-01-01 00:00:03', 'InstallAdmin', '2026-01-01 00:00:03', 0, 1, 'external_link', 'https://example.com', 1, 'Strona WWW');
 
 -- --------------------------------------------------------
 
@@ -401,7 +460,7 @@ ALTER TABLE `calendar_slots`
 -- AUTO_INCREMENT dla tabeli `language`
 --
 ALTER TABLE `language`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=267;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=351;
 
 --
 -- AUTO_INCREMENT dla tabeli `mechanics`
