@@ -390,7 +390,7 @@ $stmt->close();
             <div id="editModal" class="modal-backdrop">
                 <div class="modal">
                     <button type="button" id="closeEditModal" class="modal-close">×</button>
-                    <h2><?php echo esc($lang_edit_reservation); ?> - <a id="editReservationNumber" href="#" target="_blank" style="color: inherit; text-decoration: none;"></a></h2>
+                    <h2><?php echo esc($lang_edit_reservation); ?> - <a id="editReservationNumber" href="#" target="_blank"></a></h2>
                     <form method="post" action="backend/update_reservation.php" id="editReservationForm">
 <?php echo csrf_field(); ?>
                         <input type="hidden" name="reservation[slot_id]" id="editSlotId">
@@ -464,7 +464,7 @@ $stmt->close();
 
                         <div class="edit-time-row">
                             <label><?php echo esc($lang_plate); ?>:
-                                <input type="text" name="reservation[plate]" id="editPlate" style="width: 200px;">
+                                <input type="text" name="reservation[plate]" id="editPlate">
                             </label>
                             <?php echo esc($lang_cancelled); ?>
                             <input type="radio" name="reservation[state]" id="editStateTak" value="1"><?php echo esc($lang_yes); ?>
@@ -485,11 +485,11 @@ $stmt->close();
                             <input type="hidden" id="editReservationStart">
                         </div>
 
-                        <div id="editButtons" style="display: flex; gap: 10px; margin-top: 10px;">
-                            <button type="submit" style="flex: 1" class="button-green"><?php echo esc($lang_save_changes) ?></button>
-                            <button type="button" id="deleteBtn" style="flex: 1; background: #dc2626;"><?php echo esc($lang_delete); ?></button>
+                        <div id="editButtons">
+                            <button type="submit" class="button-green"><?php echo esc($lang_save_changes) ?></button>
+                            <button type="button" id="deleteBtn"><?php echo esc($lang_delete); ?></button>
                         </div>
-                        <div id="editDisabledMessage" class="button-orange" style="display: none; margin-top: 10px;"></div>
+                        <div id="editDisabledMessage" class="button-orange"></div>
                 </div>
                 </form>
             </div>
@@ -693,7 +693,7 @@ $stmt->close();
     </div>
 </body>
 <div id="footer">
-    <p><a href="https://itws.pl" style="text-decoration: none; color: #fff;">ekolives (ITWS) &copy; </a> <?php echo date("Y"); ?></p>
+    <p><a href="https://itws.pl">ekolives (ITWS) &copy; </a> <?php echo date("Y"); ?></p>
 </div>
 
 </html>

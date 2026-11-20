@@ -9,13 +9,13 @@
 </head>
 
 <body class="login-page">
-    <main class="login-card" style="text-align: center;">
+    <main class="login-card login-card-center">
         <div class="login-brand">
             <span class="login-brand-dot"></span>
             <span class="login-brand-name">Brak uprawnień</span>
         </div>
-        <h1 style="font-size: 20px;">Nie masz uprawnień do przeglądania tej strony</h1>
-        <a href="../table/index.php" class="login-submit" style="display: inline-block; text-decoration: none;">Powrót do kalendarza</a>
+        <h1>Nie masz uprawnień do przeglądania tej strony</h1>
+        <a href="../table/index.php" class="login-submit">Powrót do kalendarza</a>
     </main>
 </body>
 

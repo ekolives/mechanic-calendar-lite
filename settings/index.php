@@ -44,56 +44,10 @@ $activeTab = $_SESSION['active_tab'] ?? '1';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="../newstyle.css?v=<?php echo filemtime(__DIR__ . '/../newstyle.css'); ?>" />
 
-    
-    <style>
-        /* Styl zakładek */
-        .tabs .tab {
-            padding: 7px 14px;
-            cursor: pointer;
-            border-radius: 7px;
-            color: #e2e8f0;
-            font-size: 13px;
-            font-weight: 600;
-            white-space: nowrap;
-            transition: background .15s;
-        }
-
-        .tabs .tab:hover {
-            background: rgba(255, 255, 255, .14);
-        }
-
-        .tabs .tab.active {
-            background: #2563eb;
-            color: #fff;
-        }
-
-        #header.calendar-header + #wrapper {
-            padding-top: 16px;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            border: 1px solid #ccc;
-            padding: 6px;
-        }
-    </style>
 
 </head>
 
-<body>
+<body class="settings-index">
 
     <?php
     ob_start();
@@ -134,7 +88,7 @@ $activeTab = $_SESSION['active_tab'] ?? '1';
 
 
             <?php if ($settingsError = flash_pop('settings_error')): ?>
-                <div class="settings-alert settings-alert-error" role="alert" style="max-width: 980px; margin: 0 auto 16px;"><?php echo htmlspecialchars($settingsError, ENT_QUOTES, 'UTF-8'); ?></div>
+                <div class="settings-alert settings-alert-error settings-alert-page" role="alert"><?php echo htmlspecialchars($settingsError, ENT_QUOTES, 'UTF-8'); ?></div>
             <?php endif; ?>
 
             <div id="tab-1" class="tab-content <?php echo ($activeTab === '1') ? 'active' : ''; ?>">

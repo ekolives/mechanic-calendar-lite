@@ -2085,8 +2085,19 @@ body.login-page {
   filter: brightness(1.08);
 }
 
-/* przycisk Usuń ma kolor w atrybucie style - zachowujemy go, poprawiamy tylko kształt */
+/* przyciski Zapisz / Usuń w oknie edycji (desktop) */
+.modal #editButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.modal #editButtons button {
+  flex: 1;
+}
+
 .modal #deleteBtn {
+  background: #dc2626;
   border: none;
   box-shadow: 0 3px 10px rgba(220, 38, 38, .3);
   color: #fff;
@@ -2135,6 +2146,8 @@ body.login-page {
 
 /* komunikat zamiast przycisków dla zablokowanych rezerwacji */
 .modal #editDisabledMessage {
+  display: none; /* pokazywany przez JS (style.display) */
+  margin-top: 10px;
   border-radius: 9px;
   text-align: center;
 }
@@ -2476,4 +2489,109 @@ body.login-page {
   .audit-filter-text {
     grid-column: 1 / -1;
   }
+}
+
+/* ---- Ustawienia (settings/index.php): zakładki ---- */
+.tabs .tab {
+  padding: 7px 14px;
+  cursor: pointer;
+  border-radius: 7px;
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background .15s;
+}
+
+.tabs .tab:hover {
+  background: rgba(255, 255, 255, .14);
+}
+
+.tabs .tab.active {
+  background: #2563eb;
+  color: #fff;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+body.settings-index #header.calendar-header + #wrapper {
+  padding-top: 16px;
+}
+
+body.settings-index table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+body.settings-index th,
+body.settings-index td {
+  border: 1px solid #ccc;
+  padding: 6px;
+}
+
+/* ---- style przeniesione z atrybutów style="" ---- */
+
+/* stopka */
+#footer a {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* numer rezerwacji w oknie edycji (desktop) */
+.modal #editReservationNumber {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* pole rejestracji w oknie edycji (desktop) */
+.modal #editPlate {
+  width: 200px;
+  max-width: 100%;
+}
+
+/* filtry listy rezerwacji */
+.filter-card input.filter-input-phone {
+  width: 130px;
+}
+
+.filter-card input.filter-input-vin {
+  width: 180px;
+}
+
+.filter-card input.filter-input-plate {
+  width: 110px;
+}
+
+/* paginacja listy rezerwacji */
+.reservation-pagination {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+/* przycisk-link (np. "Powrót do kalendarza", "Przejdź do logowania") */
+a.login-submit {
+  display: inline-block;
+  text-decoration: none;
+}
+
+/* strona "Brak uprawnień" */
+.login-card.login-card-center {
+  text-align: center;
+}
+
+.login-card.login-card-center h1 {
+  font-size: 20px;
+}
+
+/* komunikat błędu nad zakładkami ustawień */
+.settings-alert.settings-alert-page {
+  max-width: 980px;
+  margin: 0 auto 16px;
 }

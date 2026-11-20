@@ -105,15 +105,15 @@ echo '</select>';
                 </div>
                 <div class="filter-field">
                     <label><?php echo htmlspecialchars($lang_phone ?? 'Telefon', ENT_QUOTES, 'UTF-8'); ?></label>
-                    <input type="text" name="reservation_phone" value="<?php echo htmlspecialchars($_GET['reservation_phone'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 130px;" />
+                    <input type="text" name="reservation_phone" class="filter-input-phone" value="<?php echo htmlspecialchars($_GET['reservation_phone'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                 </div>
                 <div class="filter-field">
                     <label><?php echo htmlspecialchars($lang_vin ?? 'VIN', ENT_QUOTES, 'UTF-8'); ?></label>
-                    <input type="text" name="reservation_vin" value="<?php echo htmlspecialchars($_GET['reservation_vin'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 180px;" />
+                    <input type="text" name="reservation_vin" class="filter-input-vin" value="<?php echo htmlspecialchars($_GET['reservation_vin'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                 </div>
                 <div class="filter-field">
                     <label><?php echo htmlspecialchars($lang_plate ?? 'Rejestracja', ENT_QUOTES, 'UTF-8'); ?></label>
-                    <input type="text" name="reservation_plate" value="<?php echo htmlspecialchars($_GET['reservation_plate'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="width: 110px;" />
+                    <input type="text" name="reservation_plate" class="filter-input-plate" value="<?php echo htmlspecialchars($_GET['reservation_plate'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                 </div>
                 <div class="filter-field filter-field-check">
                     <label class="filter-check"><input type="checkbox" name="reservation_rejected" value="1" <?php echo isset($_GET['reservation_rejected']) ? 'checked' : ''; ?>> <?php echo htmlspecialchars($lang_cancelled ?? 'Odwołana', ENT_QUOTES, 'UTF-8'); ?></label>
@@ -271,7 +271,7 @@ echo '</select>';
                     return "reservation_list.php?" . http_build_query($query_string);
                 }
 
-                echo '<div style="margin-top:20px; text-align:center; font-size:16px;">';
+                echo '<div class="reservation-pagination">';
 
                 // Pierwsza
                 if ($page > 1) {

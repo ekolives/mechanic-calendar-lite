@@ -22,7 +22,7 @@ $worker = $result->fetch_assoc();
 $result->free();
 $stmt->close();
 
-$pageTitle = 'Edytuj pracownika';
+$pageTitle = 'Edytuj slot';
 $backTab = '1';
 include __DIR__ . '/_header.php';
 

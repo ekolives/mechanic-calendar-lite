@@ -182,7 +182,7 @@ if (isset($_POST['user_login'], $_POST['user_password']) && is_string($_POST['us
             <button type="submit" class="login-submit"><?php echo htmlspecialchars($lang_submit, ENT_QUOTES, 'UTF-8'); ?></button>
         </form>
 
-        <p class="credits">ekolives &#x24D2; <?php echo date("Y"); ?> v <?php echo htmlspecialchars(trim((string)@file_get_contents(__DIR__ . '/VERSION')), ENT_QUOTES, 'UTF-8'); ?></p>
+        <p class="credits">ekolives &#x24D2; <?php echo date("Y"); ?> v1.1.6 <?php echo htmlspecialchars(trim((string)@file_get_contents(__DIR__ . '/VERSION')), ENT_QUOTES, 'UTF-8'); ?></p>
     </main>
 </body>
 

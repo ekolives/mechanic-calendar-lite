@@ -117,7 +117,7 @@ if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="settings-alert settings-alert-success" role="status">Instalacja zakończona pomyślnie.</div>
             <p>Zaloguj się jako <b>admin</b> hasłem, które właśnie ustawiłeś(-aś).</p>
             <p><b>Ze względów bezpieczeństwa usuń teraz katalog <code>install/</code> z serwera.</b></p>
-            <p><a href="../index.php" class="login-submit" style="display:inline-block; text-decoration:none;">Przejdź do logowania</a></p>
+            <p><a href="../index.php" class="login-submit">Przejdź do logowania</a></p>
 
         <?php elseif ($locked): ?>
             <div class="settings-alert settings-alert-success" role="status">🔒 System jest już zainstalowany.</div>
