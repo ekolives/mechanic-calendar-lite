@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $title = trim($r['title'] ?? '');
         $reservation_description = trim($r['reservation_description'] ?? '');
         $phone = trim($r['phone'] ?? '');
+        $nip = trim($r['nip'] ?? '');
         $vin = trim($r['vin'] ?? '');
         $plate = trim($r['plate'] ?? '');
 
@@ -80,14 +81,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             reservation_vin, 
                             reservation_plate, 
                             reservation_state,
-                            sys_updatedby, 
+                            nip,
+                            sys_updatedby,
                             sys_submiter,
                             sys_createdate,
                             sys_updatedate)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())'
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())'
                     );
                     $stmt->bind_param(
-                        'issssssssiii',
+                        'issssssssisii',
                         $mechanicId,
                         $slotDate,
                         $slotStart,
@@ -98,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $vin,
                         $plate,
                         $state,
+                        $nip,
                         $userId,
                         $userId
                     );
@@ -105,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($stmt->execute()) {
                         $_SESSION['reservation_success'] = 'Rezerwacja została pomyślnie dodana.';
 
-                        $audit_log_data ="mechanicId = $mechanicId,slotDate = $slotDate,slotStart = $slotStart,slotEnd = $slotEnd,title = $title,reservation_description = $reservation_description,phone = $phone,vin = $vin,plate = $plate";
+                        $audit_log_data ="mechanicId = $mechanicId,slotDate = $slotDate,slotStart = $slotStart,slotEnd = $slotEnd,title = $title,reservation_description = $reservation_description,phone = $phone,nip = $nip,vin = $vin,plate = $plate";
                         audit_log($conn, $userName, 'Create reservation',  $audit_log_data);
 
                         // powiadomienie o stworzonej rezerwacji

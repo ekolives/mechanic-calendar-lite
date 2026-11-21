@@ -432,10 +432,17 @@ function mobile_weekday_name(DateTimeInterface $date): string
                 <textarea name="reservation[reservation_description]" rows="3"></textarea>
             </label>
 
-            <label>
-                <?php echo mobile_h($lang_phone); ?>
-                <input type="text" name="reservation[phone]">
-            </label>
+            <div class="mobile-form-row">
+                <label>
+                    <?php echo mobile_h($lang_phone); ?>
+                    <input type="text" name="reservation[phone]">
+                </label>
+
+                <label>
+                    NIP
+                    <input type="text" name="reservation[nip]" maxlength="20">
+                </label>
+            </div>
 
             <label>
                 <?php echo mobile_h($lang_vin); ?>
@@ -474,7 +481,6 @@ function mobile_weekday_name(DateTimeInterface $date): string
 <?php echo csrf_field(); ?>
 
             <input type="hidden" name="reservation[slot_id]" id="editSlotId">
-            <input type="hidden" name="reservation[nip]" id="editNip">
             <input type="hidden" name="reservation[receipt_or_invoice]" id="editReceiptOrInvoice">
             <input type="hidden" name="reservation[comment]" id="editComment">
 
@@ -524,10 +530,17 @@ function mobile_weekday_name(DateTimeInterface $date): string
                 <textarea name="reservation[reservation_description]" id="editDescription" rows="4"></textarea>
             </label>
 
-            <label>
-                <?php echo mobile_h($lang_phone); ?>
-                <input type="text" name="reservation[phone]" id="editPhone">
-            </label>
+            <div class="mobile-form-row">
+                <label>
+                    <?php echo mobile_h($lang_phone); ?>
+                    <input type="text" name="reservation[phone]" id="editPhone">
+                </label>
+
+                <label>
+                    NIP
+                    <input type="text" name="reservation[nip]" id="editNip" maxlength="20">
+                </label>
+            </div>
 
             <label>
                 <?php echo mobile_h($lang_vin); ?>
@@ -754,6 +767,7 @@ function mobile_weekday_name(DateTimeInterface $date): string
     autoHideMessage('reservationError');
     autoHideMessage('reservationSuccess');
 </script>
+<script src="../session-watch.js?v=<?php echo filemtime(__DIR__ . '/../session-watch.js'); ?>"></script>
 
 </body>
 </html>

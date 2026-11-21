@@ -362,9 +362,14 @@ $stmt->close();
                         <label><?php echo esc($lang_description); ?>:
                             <textarea name="reservation[reservation_description]" rows="3"></textarea>
                         </label>
-                        <label class="inline-label"><?php echo esc($lang_phone); ?>:
-                            <input type="text" name="reservation[phone]">
-                        </label>
+                        <div class="edit-time-row">
+                            <label class="inline-label"><?php echo esc($lang_phone); ?>:
+                                <input type="text" name="reservation[phone]">
+                            </label>
+                            <label class="inline-label">NIP:
+                                <input type="text" name="reservation[nip]" maxlength="20">
+                            </label>
+                        </div>
 
                         <label class="inline-label"><?php echo esc($lang_vin); ?>:
                             <input
@@ -394,7 +399,6 @@ $stmt->close();
                     <form method="post" action="backend/update_reservation.php" id="editReservationForm">
 <?php echo csrf_field(); ?>
                         <input type="hidden" name="reservation[slot_id]" id="editSlotId">
-                        <input type="hidden" name="reservation[nip]" id="editNip">
                         <input type="hidden" name="reservation[receipt_or_invoice]" id="editReceiptOrInvoice">
                         <input type="hidden" name="reservation[comment]" id="editComment">
 
@@ -443,9 +447,14 @@ $stmt->close();
                             <textarea name="reservation[reservation_description]" id="editDescription" rows="4"></textarea>
                         </label>
 
-                        <label class="inline-label"><?php echo esc($lang_phone); ?>:
-                            <input type="text" name="reservation[phone]" id="editPhone">
-                        </label>
+                        <div class="edit-time-row">
+                            <label class="inline-label"><?php echo esc($lang_phone); ?>:
+                                <input type="text" name="reservation[phone]" id="editPhone">
+                            </label>
+                            <label class="inline-label">NIP:
+                                <input type="text" name="reservation[nip]" id="editNip" maxlength="20">
+                            </label>
+                        </div>
 
 
 
@@ -691,6 +700,7 @@ $stmt->close();
 
     </div>
     </div>
+    <script src="../session-watch.js?v=<?php echo filemtime(__DIR__ . '/../session-watch.js'); ?>"></script>
 </body>
 <div id="footer">
     <p><a href="https://itws.pl">ekolives (ITWS) &copy; </a> <?php echo date("Y"); ?></p>

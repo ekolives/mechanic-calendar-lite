@@ -118,6 +118,7 @@ if (isset($_POST['user_login'], $_POST['user_password']) && is_string($_POST['us
             $_SESSION['name'] = $dbLogin;
             $_SESSION['user_permissions'] = $usertype;
             $_SESSION['logged_in'] = true;
+            $_SESSION['last_activity'] = time();
 
             // przy okazji odnawiamy hash, jeśli algorytm domyślny się zmienił
             if (password_needs_rehash($password, PASSWORD_DEFAULT)) {
