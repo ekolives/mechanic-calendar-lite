@@ -59,6 +59,123 @@ function audit_describe(string $process, string $value): array
     return ['label' => $process, 'class' => 'muted', 'detail' => $value, 'group' => 'other'];
 }
 
+function audit_parse_reservation_create(string $value): ?array
+{
+    $pattern = '/\AmechanicId[ \t]*=[ \t]*(.*?),[ \t]*slotDate[ \t]*=[ \t]*(.*?),[ \t]*slotStart[ \t]*=[ \t]*(.*?),[ \t]*slotEnd[ \t]*=[ \t]*(.*?),[ \t]*title[ \t]*=[ \t]*(.*?),[ \t]*reservation_description[ \t]*=[ \t]*(.*?),[ \t]*phone[ \t]*=[ \t]*(.*?),[ \t]*nip[ \t]*=[ \t]*(.*?),[ \t]*vin[ \t]*=[ \t]*(.*?),[ \t]*plate[ \t]*=[ \t]*(.*?)\z/s';
+    if (!preg_match($pattern, $value, $matches)) {
+        return null;
+    }
+
+    return array_combine(
+        ['mechanic', 'date', 'start', 'end', 'title', 'description', 'phone', 'nip', 'vin', 'plate'],
+        array_map('trim', array_slice($matches, 1))
+    );
+}
+
+/**
+ * Rozbija zapis zmiany rezerwacji na pola do porównania Old/New.
+ * Obsługuje zarówno dotychczasowy format, jak i zapis zawierający stare i nowe wartości.
+ */
+function audit_parse_reservation_change(string $value): array
+{
+    $get = static function (string $pattern, string $text): string {
+        return preg_match($pattern, $text, $matches) ? trim($matches[1]) : '';
+    };
+
+    $slotId = $get('/Slot ID:\s*([^+\s,]+)/', $value);
+    $oldMechanic = $get('/oldMechanicId\s*=\s*([^,\r\n]+)/', $value);
+    $newMechanic = $get('/newMechanicId\s*=\s*([^,\r\n]+)/', $value);
+
+    $slotStartOld = $get('/oldSlotStart\s*=\s*([^,\r\n]+)/', $value);
+    $slotStartNew = $get('/newSlotStart\s*=\s*([^,\r\n]+)/', $value);
+    if ($slotStartNew === '') {
+        $slotStartNew = $get('/slotStart\s*=\s*([^,\r\n]+)/', $value);
+    }
+    $slotEndOld = $get('/oldSlotEnd\s*=\s*([^,\r\n]+)/', $value);
+    $slotEndNew = $get('/newSlotEnd\s*=\s*([^,\r\n]+)/', $value);
+    if ($slotEndNew === '') {
+        $slotEndNew = $get('/slotEnd\s*=\s*([^,\r\n]+)/', $value);
+    }
+    $slotDateOld = $get('/oldSlotDate\s*=\s*([^,\r\n]+)/', $value);
+    $slotDateNew = $get('/newSlotDate\s*=\s*([^,\r\n]+)/', $value);
+
+    $titleOld = $get('/oldTitle\s*=\s*(.*?)(?=,\s*newTitle\s*=|$)/s', $value);
+    $titleNew = $get('/newTitle\s*=\s*(.*?)(?=,\s*(?:old|new)?[A-Za-z_]+\s*=|$)/s', $value);
+    if ($titleNew === '') {
+        $titleNew = $get('/\btitle\s*=\s*(.*?)(?=,\s*(?:reservation_description|phone|vin|plate|state)\s*=|$)/s', $value);
+    }
+
+    $descriptionOld = $get('/oldReservationDescription\s*=\s*(.*?)(?=,\s*newReservationDescription\s*=|$)/s', $value);
+    $descriptionNew = $get('/newReservationDescription\s*=\s*(.*?)(?=,\s*(?:old|new)?[A-Za-z_]+\s*=|$)/s', $value);
+    if ($descriptionNew === '') {
+        $descriptionNew = $get('/reservation_description\s*=\s*(.*?)(?=,\s*(?:phone|vin|plate|state)\s*=|$)/s', $value);
+    }
+
+    $phoneOld = $get('/oldPhone\s*=\s*([^,\r\n]+)/', $value);
+    $phoneNew = $get('/newPhone\s*=\s*([^,\r\n]+)/', $value);
+    if ($phoneNew === '') {
+        $phoneNew = $get('/\bphone\s*=\s*([^,\r\n]+)/', $value);
+    }
+    $vinOld = $get('/oldVin\s*=\s*([^,\r\n]+)/', $value);
+    $vinNew = $get('/newVin\s*=\s*([^,\r\n]+)/', $value);
+    if ($vinNew === '') {
+        $vinNew = $get('/\bvin\s*=\s*([^,\r\n]+)/', $value);
+    }
+    $plateOld = $get('/oldPlate\s*=\s*([^,\r\n]+)/', $value);
+    $plateNew = $get('/newPlate\s*=\s*([^,\r\n]+)/', $value);
+    if ($plateNew === '') {
+        $plateNew = $get('/\bplate\s*=\s*([^,\r\n]+)/', $value);
+    }
+    $stateOld = $get('/oldState\s*=\s*([^,\r\n]+)/', $value);
+    $stateNew = $get('/newState\s*=\s*([^,\r\n]+)/', $value);
+    if ($stateNew === '') {
+        $stateNew = $get('/\bstate\s*=\s*([^,\r\n]+)/', $value);
+    }
+    $nipOld = $get('/oldNip\s*=\s*([^,\r\n]+)/', $value);
+    $nipNew = $get('/newNip\s*=\s*([^,\r\n]+)/', $value);
+    $receiptOld = $get('/oldReceiptOrInvoice\s*=\s*([^,\r\n]+)/', $value);
+    $receiptNew = $get('/newReceiptOrInvoice\s*=\s*([^,\r\n]+)/', $value);
+    $commentOld = $get('/oldComment\s*=\s*(.*?)(?=,\s*newComment\s*=|$)/s', $value);
+    $commentNew = $get('/newComment\s*=\s*(.*?)(?=,\s*(?:old|new)?[A-Za-z_]+\s*=|$)/s', $value);
+    $odometerOld = $get('/oldOdometer\s*=\s*([^,\r\n]+)/', $value);
+    $odometerNew = $get('/newOdometer\s*=\s*([^,\r\n]+)/', $value);
+
+    $slotIdOld = $get('/oldSlotId\s*=\s*([^,\r\n]+)/', $value);
+
+    return [
+        'slotIdOld' => $slotIdOld,
+        'slotIdNew' => $slotId,
+        'mechanicOld' => $oldMechanic,
+        'mechanicNew' => $newMechanic,
+        'slotStartOld' => $slotStartOld,
+        'slotStartNew' => $slotStartNew,
+        'slotEndOld' => $slotEndOld,
+        'slotEndNew' => $slotEndNew,
+        'slotDateOld' => $slotDateOld,
+        'slotDateNew' => $slotDateNew,
+        'titleOld' => $titleOld,
+        'titleNew' => $titleNew,
+        'descriptionOld' => $descriptionOld,
+        'descriptionNew' => $descriptionNew,
+        'phoneOld' => $phoneOld,
+        'phoneNew' => $phoneNew,
+        'vinOld' => $vinOld,
+        'vinNew' => $vinNew,
+        'plateOld' => $plateOld,
+        'plateNew' => $plateNew,
+        'stateOld' => $stateOld,
+        'stateNew' => $stateNew,
+        'nipOld' => $nipOld,
+        'nipNew' => $nipNew,
+        'receiptOld' => $receiptOld,
+        'receiptNew' => $receiptNew,
+        'commentOld' => $commentOld,
+        'commentNew' => $commentNew,
+        'odometerOld' => $odometerOld,
+        'odometerNew' => $odometerNew,
+    ];
+}
+
 /** Warunki SQL dla filtra "typ zdarzenia". */
 $typeConditions = [
     'login_ok'     => "(process = 'logowanie' AND `value` LIKE 'success%')",
@@ -138,6 +255,12 @@ while ($usersRes && ($u = $usersRes->fetch_assoc())) {
     if ($u['sys_submiter'] !== '') {
         $auditUsers[] = $u['sys_submiter'];
     }
+}
+
+$mechanicNames = [];
+$mechanicsRes = $conn->query('SELECT mechanic_id, mechanic_name FROM mechanics');
+while ($mechanicsRes && ($mechanic = $mechanicsRes->fetch_assoc())) {
+    $mechanicNames[(int)$mechanic['mechanic_id']] = (string)$mechanic['mechanic_name'];
 }
 
 // ---------- liczba wyników i strona ----------
@@ -277,6 +400,7 @@ $auditLink = static function (int $p) use ($fUser, $fType, $fFrom, $fTo, $fText)
                         $ts = strtotime((string)$row['sys_createdate']);
                         $detail = (string)$info['detail'];
                         $user = (string)$row['sys_submiter'];
+                        $createdReservation = $row['process'] === 'Create reservation' ? audit_parse_reservation_create($detail) : null;
                         ?>
                         <tr>
                             <td class="audit-time">
@@ -297,6 +421,82 @@ $auditLink = static function (int $p) use ($fUser, $fType, $fFrom, $fTo, $fText)
                             <td class="audit-detail">
                                 <?php if ($detail === ''): ?>
                                     <span class="audit-none">—</span>
+                                <?php elseif ($createdReservation !== null): ?>
+                                    <details class="audit-change">
+                                        <summary><?php echo esc(mb_substr($detail, 0, 110)); ?><?php echo mb_strlen($detail) > 110 ? '…' : ''; ?></summary>
+                                        <table class="audit-change-table audit-create-table">
+                                            <thead><tr><th>Szczegóły rezerwacji</th></tr></thead>
+                                            <tbody>
+                                                <?php
+                                                $fields = [
+                                                    'Mechanik' => $mechanicNames[(int)$createdReservation['mechanic']] ?? $createdReservation['mechanic'],
+                                                    'Data' => $createdReservation['date'],
+                                                    'Początek' => $createdReservation['start'],
+                                                    'Koniec' => $createdReservation['end'],
+                                                    'Tytuł' => $createdReservation['title'],
+                                                    'Opis' => $createdReservation['description'],
+                                                    'Telefon' => $createdReservation['phone'],
+                                                    'NIP' => $createdReservation['nip'],
+                                                    'VIN' => $createdReservation['vin'],
+                                                    'Rejestracja' => $createdReservation['plate'],
+                                                ];
+                                                foreach ($fields as $field => $fieldValue):
+                                                ?>
+                                                    <tr><td><strong><?php echo esc($field); ?></strong><br><?php echo $fieldValue === '' ? '<span class="audit-none">—</span>' : esc($fieldValue); ?></td></tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </details>
+                                <?php elseif ($row['process'] === 'Modify reservation'): ?>
+                                    <?php $change = audit_parse_reservation_change($detail); ?>
+                                    <details class="audit-change">
+                                        <summary>Zobacz zmiany</summary>
+                                        <table class="audit-change-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Stara wartość</th>
+                                                    <th>Nowa wartość</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                $rowsToShow = [
+                                                    'ID slota' => [$change['slotIdOld'], $change['slotIdNew']],
+                                                    'Mechanik' => [
+                                                        isset($mechanicNames[(int)$change['mechanicOld']]) ? $mechanicNames[(int)$change['mechanicOld']] : $change['mechanicOld'],
+                                                        isset($mechanicNames[(int)$change['mechanicNew']]) ? $mechanicNames[(int)$change['mechanicNew']] : $change['mechanicNew'],
+                                                    ],
+                                                    'Początek' => [$change['slotStartOld'], $change['slotStartNew']],
+                                                    'Koniec' => [$change['slotEndOld'], $change['slotEndNew']],
+                                                    'Data' => [$change['slotDateOld'], $change['slotDateNew']],
+                                                    'Tytuł' => [$change['titleOld'], $change['titleNew']],
+                                                    'Opis' => [$change['descriptionOld'], $change['descriptionNew']],
+                                                    'Telefon' => [$change['phoneOld'], $change['phoneNew']],
+                                                    'VIN' => [$change['vinOld'], $change['vinNew']],
+                                                    'Rejestracja' => [$change['plateOld'], $change['plateNew']],
+                                                    'Stan' => [$change['stateOld'], $change['stateNew']],
+                                                    'NIP' => [$change['nipOld'], $change['nipNew']],
+                                                    'Dokument' => [$change['receiptOld'], $change['receiptNew']],
+                                                    'Komentarz' => [$change['commentOld'], $change['commentNew']],
+                                                    'Przebieg' => [$change['odometerOld'], $change['odometerNew']],
+                                                ];
+                                                foreach ($rowsToShow as $field => [$oldValue, $newValue]):
+                                                    if ($oldValue === '' && $newValue === '') continue;
+                                                ?>
+                                                    <tr>
+                                                        <td>
+                                                            <strong><?php echo esc($field); ?></strong><br>
+                                                            <?php echo $oldValue === '' ? '<span class="audit-none">—</span>' : esc($oldValue); ?>
+                                                        </td>
+                                                        <td>
+                                                            <strong><?php echo esc($field); ?></strong><br>
+                                                            <?php echo $newValue === '' ? '<span class="audit-none">—</span>' : esc($newValue); ?>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </details>
                                 <?php elseif (mb_strlen($detail) > 110): ?>
                                     <details>
                                         <summary><?php echo esc(mb_substr($detail, 0, 110)); ?>…</summary>

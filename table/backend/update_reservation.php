@@ -32,7 +32,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $comment = trim($r['comment'] ?? '');
         $odometer = trim($r['odometer'] ?? '');
 
-        $selectStmt = $conn->prepare('SELECT mechanic_id FROM calendar_slots WHERE slot_id = ?');
+        $selectStmt = $conn->prepare(
+            'SELECT mechanic_id, slot_date, slot_time_start, slot_time_end, reservation_title,
+                    reservation_description, reservation_phone, reservation_vin, reservation_plate,
+                    reservation_state, nip, receipt_or_invoice, comment, odometer
+             FROM calendar_slots
+             WHERE slot_id = ?'
+        );
         $selectStmt->bind_param('s', $slotId);
         $selectStmt->execute();
         $selectResult = $selectStmt->get_result();
@@ -41,6 +47,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($mechanicRow) {
             $mechanicId = (int)$mechanicRow['mechanic_id'];
+            $oldSlotDate = (string)$mechanicRow['slot_date'];
+            $oldSlotStart = (string)$mechanicRow['slot_time_start'];
+            $oldSlotEnd = (string)$mechanicRow['slot_time_end'];
+            $oldTitle = (string)$mechanicRow['reservation_title'];
+            $oldDescription = (string)$mechanicRow['reservation_description'];
+            $oldPhone = (string)$mechanicRow['reservation_phone'];
+            $oldVin = (string)$mechanicRow['reservation_vin'];
+            $oldPlate = (string)$mechanicRow['reservation_plate'];
+            $oldState = (int)$mechanicRow['reservation_state'];
+            $oldNip = (string)$mechanicRow['nip'];
+            $oldReceiptOrInvoice = (string)$mechanicRow['receipt_or_invoice'];
+            $oldComment = (string)$mechanicRow['comment'];
+            $oldOdometer = (string)$mechanicRow['odometer'];
 
             if (!user_can_access_mechanic($conn, $userId, $mechanicId)) {
                 $_SESSION['reservation_error'] = 'Nie masz uprawnień do edycji tej rezerwacji.';
@@ -128,7 +147,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             );
                             if ($stmt->execute()) {
                                 $_SESSION['reservation_success'] = 'Rezerwacja została pomyślnie zaktualizowana.';
-                                $audit_log_data ="oldMechanicId = $mechanicId, newMechanicId = $new_mechanic_id, slotStart = $slotStart, slotEnd = $slotEnd, title = $title, reservation_description = $reservation_description, phone = $phone, vin = $vin, plate = $plate, state = $state";
+                                $audit_log_data = 'oldMechanicId = ' . $mechanicId
+                                    . ', newMechanicId = ' . $new_mechanic_id
+                                    . ', oldSlotStart = ' . substr($oldSlotStart, 0, 5)
+                                    . ', newSlotStart = ' . substr($slotStart, 0, 5)
+                                    . ', oldSlotEnd = ' . substr($oldSlotEnd, 0, 5)
+                                    . ', newSlotEnd = ' . substr($slotEnd, 0, 5)
+                                    . ', oldSlotDate = ' . $oldSlotDate
+                                    . ', newSlotDate = ' . $dateInput
+                                    . ', oldTitle = ' . $oldTitle
+                                    . ', newTitle = ' . $title
+                                    . ', oldReservationDescription = ' . $oldDescription
+                                    . ', newReservationDescription = ' . $reservation_description
+                                    . ', oldPhone = ' . $oldPhone
+                                    . ', newPhone = ' . $phone
+                                    . ', oldVin = ' . $oldVin
+                                    . ', newVin = ' . $vin
+                                    . ', oldPlate = ' . $oldPlate
+                                    . ', newPlate = ' . $plate
+                                    . ', oldState = ' . $oldState
+                                    . ', newState = ' . $state
+                                    . ', oldNip = ' . $oldNip
+                                    . ', newNip = ' . $nip
+                                    . ', oldReceiptOrInvoice = ' . $oldReceiptOrInvoice
+                                    . ', newReceiptOrInvoice = ' . $receipt_or_invoice
+                                    . ', oldComment = ' . $oldComment
+                                    . ', newComment = ' . $comment
+                                    . ', oldOdometer = ' . $oldOdometer
+                                    . ', newOdometer = ' . $odometer;
                                 audit_log($conn, $userName, 'Modify reservation', 'Slot ID: ' . $slotId . ' + ' . $audit_log_data);
                             } else {
                                 error_log('update_reservation: ' . $stmt->error);

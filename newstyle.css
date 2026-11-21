@@ -1276,7 +1276,7 @@ th {
 .daily-schedule .slot-cell.reservation-cell {
   border: 1px solid rgba(15, 23, 42, .24);
   color: inherit;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.3;
 }
 
@@ -2441,6 +2441,49 @@ body.login-page {
   color: #334155;
   font-family: Consolas, "Courier New", monospace;
   font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.audit-change {
+  min-width: 260px;
+}
+
+.audit-change-table {
+  width: 100%;
+  min-width: 420px;
+  margin-top: 8px;
+  border-collapse: collapse;
+  background: #fff;
+  color: #334155;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.audit-change-table th,
+.audit-change-table td {
+  padding: 7px 9px;
+  border: 1px solid #cbd5e1;
+  vertical-align: top;
+  text-align: left;
+}
+
+.audit-change-table th {
+  background: #f1f5f9;
+  color: #334155;
+  font-weight: 700;
+}
+
+.audit-change-table th,
+.audit-change-table td {
+  width: 50%;
+}
+
+.audit-create-table {
+  min-width: 0;
+}
+
+.audit-create-table td {
+  width: 100%;
   white-space: pre-wrap;
 }
 
